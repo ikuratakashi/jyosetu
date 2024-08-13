@@ -30,3 +30,5 @@ stdout, stderr = process.communicate()
 # 出力を表示
 print(stdout.decode())
 print(stderr.decode())
+
+print("run")
