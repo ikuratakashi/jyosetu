@@ -19,7 +19,7 @@ asyncio.get_event_loop().run_forever()
 import subprocess
 
 # momoの実行コマンドとオプション
-command = ['./momo', '--no-audio-device', 'test']
+command = ['../momo_armv7/momo', '--no-audio-device', 'test']
 
 # subprocessを使ってコマンドを実行
 process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
