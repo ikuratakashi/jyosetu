@@ -1,0 +1,18 @@
+# 除外するフォルダ内を全て指定
+
+## 例 フォルダの指定
+# __pycache__/
+
+## 例 ファイル
+# /websockets
+
+## 例　拡張子
+# *.log
+
+/websockets
+
+# 設定が終わったら、以下のコマンドの様に実行してキャッシュをクリアしてください
+# git rm --cached websockets
+# git rm --cached *.log
+# git rm --cached *.pyc
+# 実行が終わったらcommitをしてください
