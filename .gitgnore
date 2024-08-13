@@ -10,9 +10,11 @@
 # *.log
 
 /websockets
+/webrtc_logs*
 
 # 設定が終わったら、以下のコマンドの様に実行してキャッシュをクリアしてください
 # git rm --cached websockets
 # git rm --cached *.log
 # git rm --cached *.pyc
 # 実行が終わったらcommitをしてください
+
