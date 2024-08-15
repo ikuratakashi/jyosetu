@@ -31,10 +31,44 @@ tar -zxvf momo-2023.1.0_raspberry-pi-os_armv7.tar.gz
 
 あとは、解凍したフォルダから、`momo` 本体と `html` フォルダを実行環境へコピーしました。
 
+## ラズパイでCPUなどの情報を参照する方法
+
+```bash
+vim /proc/cpuinfo 
+```
+vimはvimエディター。unixなどではスタンダードなテキストエディタです。
+
+以下のように表示される
+```
+processor       : 0
+  2 model name      : ARMv7 Processor rev 4 (v7l)
+  3 BogoMIPS        : 76.80
+  4 Features        : half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva     idivt vfpd32 lpae evtstrm crc32
+```
+
+vimを終了させるのは、escキーを押して、`:` を押した後に、`q!` と入力してエンターキーを押せば終了します。`q` は終了、`!` は強制的という意味合いです。
+
+## vimエディターについて
+vimで入力したい場合は、`i` を押すと入力モードに切り替わります。左下に `-- 挿入 --` と表示されます。
+
+保存して終了したい場合は、
+
+`escキー` → `:` → `wq!` 
+
+の順で入力して最後にエンターを押せば保存されます。
+
+保存したくない場合は、
+
+`escキー` → `:` → `q!` 
+
+で保存せずにvimエディタを終了することができます。
+
+vimエディターはwindowsなどのメモ帳になれてしまうと、ちょっと使いずらいと思いますが、マウスが使えない環境だと威力を発揮します。いろんなコマンドがあるので、AIなどに `vimエディターの基本的な使い方をおしえて` などと聞いてみてください。
+
 # momoの起動について
 
 ## momo自体の実行権限の付与
-
+これをしてあげないと、実行できません。
 ```bash
 chmod 770 momo
 ```
@@ -86,16 +120,5 @@ PlayとSendについては、押しても何も動かないです。momoのマ�
 4. インターフェイス
 5. VNCのチェックをONにする
 
-# ラズパイコマンド
+# ラズパイ(bash)コマンド
 
-## CPUなどの情報を参照する方法
-```bash
-vim /proc/cpuinfo 
-```
-以下のように表示される
-```
-processor       : 0
-  2 model name      : ARMv7 Processor rev 4 (v7l)
-  3 BogoMIPS        : 76.80
-  4 Features        : half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva     idivt vfpd32 lpae evtstrm crc32
-  ```
