@@ -4,13 +4,13 @@
 # __pycache__/
 
 ## 例 ファイル
-# /websockets
+# websockets
 
 ## 例　拡張子
 # *.log
 
-/websockets
-/webrtc_logs*
+websockets
+webrtc_logs*
 /tmp/*.pid
 
 # 設定が終わったら、以下のコマンドの様に実行してキャッシュをクリアしてください
