@@ -1,4 +1,4 @@
 #!/bin/bash
-./momo --no-audio-device test &
+./momo --data-channel --no-audio-device test &
 echo プロセスID：$!
 echo $! > /tmp/momo.pid
