@@ -1,9 +1,15 @@
-import sys
 import socket
 
-# ホスト名を取得
-hostname = socket.gethostname()
-# ホスト名をIPv4アドレスに変換
-ip_address = socket.gethostbyname(hostname)
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # 接続を試みる（実際には接続しない）
+        s.connect(('10.255.255.255', 1))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip
 
-print(ip_address)
+print(get_local_ip())
