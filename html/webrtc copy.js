@@ -378,12 +378,25 @@ function play() {
   remoteVideo.play();
 }
 
-function sendMessage() {
+function sendDataChannel() {
   let textData = dataTextInput.value;
   if (textData.length == 0) {
-    console.log(`sendMessage:${textData}`)
+    console.log(`sendDataChannel:${textData}`)
     return;
   }
+  if (dataChannel == null || dataChannel.readyState != "open") {
+    return;
+  }
+  if(dataChannel != null){
+    console.log(`sendDataChannel-dataChannel.readyState:${dataChannel.readyState}`)
+  }
+
+  dataChannel.onerror = (error) =>{
+    console.error('Data Channel Error:',error);
+  }
+    
+  dataChannel.send(new TextEncoder().encode(textData));
+  console.log(`sendDataChannel:${textData}`)
   dataTextInput.value = "";
 }
 
