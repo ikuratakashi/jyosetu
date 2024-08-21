@@ -18,7 +18,9 @@ echo "よろしいですか？ (y/n)"
 read answer
 
 if [ "$answer" = "y" ]; then
-    ./html/init.sh
+    cd html
+    ./init.sh
+    cd ..
 else
     echo "処理を中止しました。"
     exit
