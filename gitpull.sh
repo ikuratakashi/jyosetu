@@ -7,7 +7,7 @@ read answer
 if [ "$answer" = "y" ]; then
     git fetch origin
     git reset --hard origin/develop-ikura
-    chmod 777 init.sh
+    chmod 777 ./html/init.sh
 else
     echo "処理を中止しました。"
     exit
@@ -18,7 +18,7 @@ echo "よろしいですか？ (y/n)"
 read answer
 
 if [ "$answer" = "y" ]; then
-    ./init.sh
+    ./html/init.sh
 else
     echo "処理を中止しました。"
     exit
