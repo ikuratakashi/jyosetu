@@ -1,0 +1,10 @@
+.container {
+    display: grid;
+    grid-template-columns: 100px 200px 1fr;
+    gap: 10px; /* 列間のスペースを設定（任意） */
+}
+
+.item {
+    background-color: lightblue;
+    padding: 10px;
+}
