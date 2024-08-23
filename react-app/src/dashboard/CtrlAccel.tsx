@@ -6,6 +6,11 @@ import SubOutPrm from './SubOutPrm';
 
 function CtrlAccel(props: { value: any;}) {
   const {value} = props;
+  const prameter = {
+    fontSize:"0.5rem",
+    Buttn_height:"30px",
+    Param_height:"60px",
+  };
   return (
     <div>
       <Grid container spacing={0}>
@@ -15,10 +20,10 @@ function CtrlAccel(props: { value: any;}) {
               variant="outlined" 
               startIcon={<ArrowCircleUpIcon />} 
               sx={{ 
-                fontSize: '0.75rem',
+                fontSize: prameter.fontSize,
                 fontFamily: 'Courier New, monospace',
                 borderRadius: 0,
-                height:'40px',
+                height:prameter.Buttn_height,
                 }}>
               アクセル
             </Button>
@@ -26,17 +31,17 @@ function CtrlAccel(props: { value: any;}) {
               variant="outlined" 
               startIcon={<ArrowCircleDownIcon />} 
               sx={{ 
-                fontSize: '0.75rem',
+                fontSize: prameter.fontSize,
                 fontFamily: 'Courier New, monospace',
                 borderRadius: 0,
-                height:'40px',
+                height:prameter.Buttn_height,
                 }}>
               アクセル
             </Button>
           </Box>
         </Grid>
-        <Grid item sx={{backgroundColor:"red", height:'80px'}}>
-          <SubOutPrm value={value} sx={{ height: '80px' }}/>
+        <Grid item sx={{backgroundColor:"red", height:prameter.Param_height}}>
+          <SubOutPrm value={value} sx={{ height: prameter.Param_height}}/>
         </Grid>
       </Grid>
     </div>

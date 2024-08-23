@@ -17,7 +17,7 @@ function SubOutPrm(props: { value: any; sx: any; }) {
         border: '1px solid #000',
         fontSize: '0.875rem', // フォントサイズを調整
         fontFamily: 'Courier New, monospace', // 等幅フォントを使用
-        width:'60px',
+        width:'50px',
       }}
     >
       {value == "" ? "　" : value}
