@@ -5,47 +5,58 @@ import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import SubOutPrm from './SubOutPrm';
 
 function CtrlAccel(props: { value: any;}) {
-  const {value} = props;
-  const prameter = {
-    fontSize:"0.5rem",
-    Buttn_height:"30px",
-    Param_height:"60px",
-  };
-  return (
-    <div>
-      <Grid container spacing={0}>
-        <Grid item xs={0}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
-            <Button 
-              variant="outlined" 
-              startIcon={<ArrowCircleUpIcon />} 
-              sx={{ 
-                fontSize: prameter.fontSize,
-                fontFamily: 'Courier New, monospace',
-                borderRadius: 0,
-                height:prameter.Buttn_height,
-                }}>
-              アクセル
-            </Button>
-            <Button 
-              variant="outlined" 
-              startIcon={<ArrowCircleDownIcon />} 
-              sx={{ 
-                fontSize: prameter.fontSize,
-                fontFamily: 'Courier New, monospace',
-                borderRadius: 0,
-                height:prameter.Buttn_height,
-                }}>
-              アクセル
-            </Button>
-          </Box>
-        </Grid>
-        <Grid item sx={{backgroundColor:"red", height:prameter.Param_height}}>
-          <SubOutPrm value={value} sx={{ height: prameter.Param_height}}/>
-        </Grid>
-      </Grid>
-    </div>
-  )
+    const {value} = props;
+
+    const pram = {
+        fontSize:"0.6rem",
+        Button_h:"40px",
+        Param_h:"82px",
+        Param_w:"50px",
+      };
+    
+      const ButtonSx = { 
+        fontSize: pram.fontSize,
+        fontFamily: 'Courier New, monospace',
+        borderRadius: 0,
+        height:pram.Button_h,
+        backgroundColor:'gray',
+        '&:hover': {
+          backgroundColor: 'gray',
+          filter: 'brightness(0.8)',
+          border:'none',
+        },
+        color:'white',
+        border:'none',
+        boxShadow: '2px 2px 5px gray',
+      }
+    
+      return (
+        <div>
+          <Grid container spacing={0.3}>
+            <Grid item xs={0}>
+              <Box sx={{mb:0.3}}>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<ArrowCircleUpIcon />} 
+                  sx={ButtonSx}>
+                  アクセル
+                </Button>
+              </Box>
+              <Box>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<ArrowCircleDownIcon />} 
+                  sx={ButtonSx}>
+                  アクセル
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item sx={{height:pram.Param_h}}>
+              <SubOutPrm value={value} sx={{ height: pram.Param_h, width:pram.Param_w}}/>
+            </Grid>
+          </Grid>
+        </div>
+      )
 }
 
 export default CtrlAccel

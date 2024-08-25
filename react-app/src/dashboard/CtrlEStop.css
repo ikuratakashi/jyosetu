@@ -1,0 +1,39 @@
+.emergency-stop-button {
+    display: inline-block;
+    width: 200px;
+    height: 80px;
+    background: repeating-linear-gradient(
+        45deg,
+        yellow,
+        yellow 10px,
+        black 10px,
+        rgb(0, 0, 0) 20px
+    );
+    border: 10px solid red;
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    line-height: 60px;
+    font-size: 17px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s;
+}
+
+.emergency-stop-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 55px;
+    height: 55px;
+    background-color: red;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+
+.emergency-stop-button span {
+    position: relative;
+    z-index: 2;
+}

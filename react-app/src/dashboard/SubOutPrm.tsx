@@ -8,16 +8,16 @@ function SubOutPrm(props: { value: any; sx: any; }) {
     <div>
       <Box
       sx={{
-        ...sx,
         display: 'flex', // フレックスボックスを使用
         justifyContent: 'right', // 水平方向の中央揃え
         alignItems: 'center', // 垂直方向の中央揃え
         padding: '4px 8px',
-        backgroundColor: 'lightblue',
-        border: '1px solid #000',
-        fontSize: '0.875rem', // フォントサイズを調整
+        border: '1px solid dimgray',
+        fontSize: '1rem', // フォントサイズを調整
         fontFamily: 'Courier New, monospace', // 等幅フォントを使用
-        width:'50px',
+        backgroundColor:'white',
+        color: "black", 
+        ...sx,
       }}
     >
       {value == "" ? "　" : value}
