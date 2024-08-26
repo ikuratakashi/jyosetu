@@ -8,6 +8,7 @@ import CtrlAccel from './CtrlAccel';
 import CtrlDpad from './CtrlDpad';
 import CtrlButton from './CtrlButton';
 import CtrlEStop from './CtrlEStop';
+import CtrlDpad8 from './CtrlDpad8';
 
 function Controller() {
   return (
@@ -80,6 +81,66 @@ function Controller() {
                       }}>
               {/* 緊急停止ボタン */}
               <CtrlEStop value={"0"}/>
+            </Grid>
+            <Grid item xs></Grid>
+          </Grid>
+
+          {/* 雪射出口の操作 */}
+          <Grid container 
+            sx={{
+                  width: '100%',
+                  //border:"1px black solid",
+                  mb:1,
+                }}
+          >
+            <Grid item xs></Grid>
+            <Grid item 
+                  sx={{
+                        height:'100%',width:"220px",
+                        //border:"1px solid black",
+                        display:'flex',
+                        alignItems: 'center', // 垂直方向の中央揃え
+                        justifyContent: 'center' // 水平方向の中央揃え
+                      }}
+            >
+
+              {/* 8方向キー */}
+              <CtrlDpad8 
+              valueUp={"UP"}
+              valueUpRithg={"UR"}
+              valueRight={"R"}
+              valueRightDown={"RD"}
+              valueDown={"D"}
+              valueLeftDown={"LD"}
+              valueLeft={"L"}
+              valueLeftUp={"LU"}
+              valueLeftRight={"LRLR"}
+              valueUpDown={"DWDW"}
+              />
+            </Grid>
+            <Grid item sx={{width:'30px'}}></Grid>
+            <Grid item 
+                  sx={{
+                        height:'100%',width:"215px",
+                        //border:"1px solid black",
+                        display:'flex',
+                        alignItems: 'center', // 垂直方向の中央揃え
+                        justifyContent: 'center' // 水平方向の中央揃え
+                      }}
+            >
+              {/* 8方向キー */}
+              <CtrlDpad8 
+              valueUp={"UP"}
+              valueUpRithg={"UR"}
+              valueRight={"R"}
+              valueRightDown={"RD"}
+              valueDown={"D"}
+              valueLeftDown={"LD"}
+              valueLeft={"L"}
+              valueLeftUp={"LU"}
+              valueLeftRight={"LRLR"}
+              valueUpDown={"DWDW"}
+              />
             </Grid>
             <Grid item xs></Grid>
           </Grid>
