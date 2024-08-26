@@ -18,7 +18,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems } from './listItems';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-router-dom';
 
 import Home from './Home';
 import Controller from './Controller';
@@ -190,13 +190,15 @@ function DashboardContent() {
             <Container maxWidth={false} disableGutters sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column',height:'100%' }}>
 
               {/* ページのコンポーネントを設定 */}
-              <Router>
-                <Routes>
-                  <Route path="/" element={<Controller />} />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/controller" element={<Controller />} />
-                </Routes>
-              </Router>
+              <BrowserRouter basename=".">
+                <Router>
+                  <Routes>
+                    <Route path="/" element={<Controller />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/controller" element={<Controller />} />
+                  </Routes>
+                </Router>
+              </BrowserRouter>
 
               {/* Copyright */}
               <Copyright sx={{ pt: 1 }} />
