@@ -4,6 +4,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
+import { useNavigate } from 'react-router-dom';
 
 export const mainListItems = (
   <React.Fragment>
@@ -13,7 +14,7 @@ export const mainListItems = (
     {/* ---------------------------------------- */}
     <ListItemButton
         onClick={() => {
-          window.location.pathname = "/home";
+          window.location.pathname = "./jyosetu/home";
       }}
     >
       <ListItemIcon>
@@ -28,7 +29,7 @@ export const mainListItems = (
     {/* ---------------------------------------- */}
     <ListItemButton
         onClick={() => {
-          window.location.pathname = "/controller";
+          window.location.pathname = "./jyosetu/controller";
       }}
     >
       <ListItemIcon>

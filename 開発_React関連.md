@@ -9,7 +9,22 @@ yarn run build
 ```
 `build` フォルダの内容を `html` にコピーし、momoを起動すると、htmlフォルダ内のファイルを読み込んでサイトが表示できるようになります。
 
-## 
+## buildをした時に自動でbuildの内容をgh-pagesブランチへpushする方法
+
+https://emit.hateblo.jp/entry/2023/08/26/163533
+
+この方法の時に、`package.json` と ~~`src\dashboard\Dashboard.tsx`~~ を変更する内容
+
+- package.json 追加文字列
+```
+  "homepage": ".",
+```
+
+- Dashboard.tsx の変更内容
+```
+```
+
+※これでもうまくいかない。。。
 
 ## リポジトリをクローンした後に実行するコマンド
 

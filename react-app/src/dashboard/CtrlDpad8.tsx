@@ -64,7 +64,7 @@ function CtrlDpad8(
     padding: '0px',
     borderRadius: 0,
     backgroundColor: 'rgba(0, 0, 0, 0)',
-//    color: 'rgba(0, 0, 0, 0)',
+    color: 'rgba(0, 0, 0, 0)',
 //    border:'none',
     boxShadow: 'none',
   };
@@ -199,7 +199,7 @@ function CtrlDpad8(
                 <Paper sx={PaperSx}></Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><SyncAltIcon /></Paper>
+                <Paper sx={PaperOutSx}><SyncAltIcon /></Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperOutSx}><SubOutPrm value={valueLeftRight} sx={{color: "black", height: pram.ParamOut_h, width:pram.ParamOut_w}}/></Paper>
@@ -211,7 +211,7 @@ function CtrlDpad8(
                 <Paper sx={PaperSx}></Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><SyncAltIcon90 /></Paper>
+                <Paper sx={PaperOutSx}><SyncAltIcon90 /></Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperOutSx}><SubOutPrm value={valueUpDown} sx={{color: "black", height: pram.ParamOut_h, width:pram.ParamOut_w}}/></Paper>

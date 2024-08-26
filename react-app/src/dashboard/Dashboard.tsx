@@ -190,15 +190,19 @@ function DashboardContent() {
             <Container maxWidth={false} disableGutters sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column',height:'100%' }}>
 
               {/* ページのコンポーネントを設定 */}
-              <BrowserRouter basename=".">
-                <Router>
-                  <Routes>
-                    <Route path="/" element={<Controller />} />
-                    <Route path="/home" element={<Home />} />
-                    <Route path="/controller" element={<Controller />} />
-                  </Routes>
-                </Router>
-              </BrowserRouter>
+
+              <Router>
+                <Routes>
+                  <Route path="/" element={<Controller />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/controller" element={<Controller />} />
+
+                  <Route path="/jyosetu" element={<Controller />} />
+                  <Route path="/jyosetu/home" element={<Home />} />
+                  <Route path="/jyosetu/controller" element={<Controller />} />
+
+                </Routes>
+              </Router>
 
               {/* Copyright */}
               <Copyright sx={{ pt: 1 }} />
