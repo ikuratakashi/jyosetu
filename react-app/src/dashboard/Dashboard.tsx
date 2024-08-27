@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react'
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
@@ -22,6 +22,9 @@ import { BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-rou
 
 import Home from './Home';
 import Controller from './Controller';
+import { useState } from 'react';
+
+
 
 function Copyright(props: any) {
   return (
@@ -108,7 +111,14 @@ const mdTheme = createTheme(
   }  
 );
 
-function DashboardContent() {
+interface DashboardContentProps {
+  sendMessage: (message: string) => void;
+}
+
+function DashboardContent(props: DashboardContentProps) {
+
+  const {sendMessage} = props
+
   const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -193,13 +203,13 @@ function DashboardContent() {
 
               <Router>
                 <Routes>
-                  <Route path="/" element={<Controller />} />
+                  <Route path="/" element={<Controller sendMessage={sendMessage}/>} />
                   <Route path="/home" element={<Home />} />
-                  <Route path="/controller" element={<Controller />} />
+                  <Route path="/controller" element={<Controller sendMessage={sendMessage}/>} />
 
-                  <Route path="/jyosetu" element={<Controller />} />
+                  <Route path="/jyosetu" element={<Controller sendMessage={sendMessage}/>} />
                   <Route path="/jyosetu/home" element={<Home />} />
-                  <Route path="/jyosetu/controller" element={<Controller />} />
+                  <Route path="/jyosetu/controller" element={<Controller sendMessage={sendMessage}/>} />
 
                 </Routes>
               </Router>
@@ -216,6 +226,7 @@ function DashboardContent() {
   );
 }
 
-export default function Dashboard() {
-  return <DashboardContent />;
+export default function Dashboard(props:DashboardContentProps) {
+  const {sendMessage} = props;
+  return <DashboardContent sendMessage={sendMessage}/>;
 }

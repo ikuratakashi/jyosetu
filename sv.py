@@ -1,28 +1,31 @@
 import sys
 sys.path.append('lib')
 import asyncio
-import websockets # type: ignore
+import websockets  # type: ignore
 import socket
 
 port = 1000
-host = "localhost"
+host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
 
-async def echo(websocket, path):
-    '''
-    メッセージを取得した時の動作
-    '''
-    async for message in websocket:
-        print(f"message: {message} / path:{path}")
-        await websocket.send(f"Echo: {message}")
+async def handler(websocket, path):
+    try:
+        async for message in websocket:
+            print(f"Received message: {message}")
+            #await websocket.send(f"Echo: {message}")
+    except websockets.exceptions.ConnectionClosedError as e:
+        print(f"Connection closed: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
-# サーバーの起動
-start_server = websockets.serve(echo, host, port)
+async def main():
+    start_server = await websockets.serve(handler, host, port)
 
-# ホスト名を取得
-hostname = socket.gethostname()
-# ホスト名をIPv4アドレスに変換
-ip_address = socket.gethostbyname(hostname)
-# サーバーの永続化
-asyncio.get_event_loop().run_until_complete(start_server)
-print(f"WebSocket server is running on ws://{ip_address}:{port} or ws://{hostname}:{port}")
-asyncio.get_event_loop().run_forever()
+    # ホスト名とIPアドレスの取得
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+    print(f"WebSocket server is running on ws://{ip_address}:{port} or ws://{hostname}:{port}")
+
+    await start_server.wait_closed()
+
+if __name__ == "__main__":
+    asyncio.run(main())

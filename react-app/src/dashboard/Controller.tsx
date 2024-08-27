@@ -9,8 +9,14 @@ import CtrlDpad from './CtrlDpad';
 import CtrlButton from './CtrlButton';
 import CtrlEStop from './CtrlEStop';
 import CtrlDpad8 from './CtrlDpad8';
+interface DashboardContentProps {
+  sendMessage: (message: string) => void;
+}
 
-function Controller() {
+function Controller(props: DashboardContentProps) {
+
+  const {sendMessage} = props
+
   return (
     <Grid container spacing={1} sx={{ height: '100%' }}>
       <Grid item style={{ width: '550px', height: '100%' }}>
@@ -80,7 +86,7 @@ function Controller() {
                         justifyContent: 'center' // 水平方向の中央揃え
                       }}>
               {/* 緊急停止ボタン */}
-              <CtrlEStop value={"0"}/>
+              <CtrlEStop value={"0"} sendMessage={sendMessage}/>
             </Grid>
             <Grid item xs></Grid>
           </Grid>
