@@ -9,11 +9,9 @@ import CtrlDpad from './CtrlDpad';
 import CtrlButton from './CtrlButton';
 import CtrlEStop from './CtrlEStop';
 import CtrlDpad8 from './CtrlDpad8';
-interface DashboardContentProps {
-  sendMessage: (message: string) => void;
-}
+import * as UtilsCommon from '../utils/UtilsCommon';
 
-function Controller(props: DashboardContentProps) {
+function Controller(props: UtilsCommon.DashboardContentProps) {
 
   const {sendMessage} = props
 
@@ -27,12 +25,12 @@ function Controller(props: DashboardContentProps) {
             <Grid item xs></Grid>
             <Grid item sx={{width:'150px'}}>
               {/* クラッチ */}
-              <CtrlClutch value={"0"}/>
+              <CtrlClutch value={"0"} sendMessage={sendMessage}/>
             </Grid>
             <Grid item sx={{width:'70px'}}></Grid>
             <Grid item sx={{width:'150px'}}>
               {/* アクセル */}
-              <CtrlAccel value={"0"}/>
+              <CtrlAccel value={"0"} sendMessage={sendMessage}/>
             </Grid>
             <Grid item xs></Grid>
           </Grid>
@@ -56,7 +54,7 @@ function Controller(props: DashboardContentProps) {
                       }}
             >
               {/* 十字キー */}
-              <CtrlDpad valueUp={"0"} valueRight={"0"} valueDown={"0"} valueLeft={"0"}/>
+              <CtrlDpad valueUp={"0"} valueRight={"0"} valueDown={"0"} valueLeft={"0"} sendMessage={sendMessage}/>
             </Grid>
             <Grid item sx={{width:'30px'}}></Grid>
             <Grid item 
@@ -69,7 +67,7 @@ function Controller(props: DashboardContentProps) {
                       }}
             >
               {/* ボタン */}
-              <CtrlButton value={"0"}/>
+              <CtrlButton value={"0"} sendMessage={sendMessage}/>
             </Grid>
             <Grid item xs></Grid>
           </Grid>
@@ -122,6 +120,7 @@ function Controller(props: DashboardContentProps) {
               valueLeftUp={"LU"}
               valueLeftRight={"LRLR"}
               valueUpDown={"DWDW"}
+              sendMessage={sendMessage}
               />
             </Grid>
             <Grid item sx={{width:'30px'}}></Grid>
@@ -146,6 +145,7 @@ function Controller(props: DashboardContentProps) {
               valueLeftUp={"LU"}
               valueLeftRight={"LRLR"}
               valueUpDown={"DWDW"}
+              sendMessage={sendMessage}
               />
             </Grid>
             <Grid item xs></Grid>

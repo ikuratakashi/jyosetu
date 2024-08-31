@@ -5,8 +5,10 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; //→
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'; //↓
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; //←
 import SubOutPrm from './SubOutPrm';
+import { CleateJsonActionToStr } from '../utils/UtilsJson';
+import { DashboardContentProps } from '../utils/UtilsCommon';
 
-function CtrlDpad(props:{ valueUp: any,valueRight: any,valueDown: any,valueLeft: any;}) {
+function CtrlDpad(props:{ valueUp: any,valueRight: any,valueDown: any,valueLeft: any;} & DashboardContentProps) {
   const {valueUp,valueRight,valueDown,valueLeft} = props;
   const pram = {
     fontSize:"10px",

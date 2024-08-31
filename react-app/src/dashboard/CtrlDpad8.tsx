@@ -11,9 +11,12 @@ import NorthWestIcon from '@mui/icons-material/NorthWest'; //↖
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import SubOutPrm from './SubOutPrm';
 import { styled } from '@mui/material/styles';
+import { CleateJsonActionToStr } from '../utils/UtilsJson';
+import { DashboardContentProps } from '../utils/UtilsCommon';
 
 function CtrlDpad8(
-  props:{
+  props:
+  {
     valueUp: any,
     valueUpRithg: any,
     valueRight: any,
@@ -24,7 +27,9 @@ function CtrlDpad8(
     valueLeftUp: any,
     valueLeftRight: any,
     valueUpDown: any,
-  }) 
+  }
+  & DashboardContentProps
+  )
 {
 
   const {

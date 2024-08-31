@@ -1,6 +1,8 @@
 import React from 'react'
 import {Box, Button, Grid, Paper} from '@mui/material';
 import SubOutPrm from './SubOutPrm';
+import { CleateJsonActionToStr } from '../utils/UtilsJson';
+import { DashboardContentProps } from '../utils/UtilsCommon';
 
 //ボタン
 ///三角
@@ -12,7 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 //四角
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 
-function CtrlButton(props: { value: any;}) {
+function CtrlButton(props: { value: any;} & DashboardContentProps) {
 
     const {value} = props;
 

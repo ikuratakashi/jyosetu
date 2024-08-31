@@ -3,9 +3,11 @@ import {Box, Button, Grid} from '@mui/material';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import SubOutPrm from './SubOutPrm';
+import { CleateJsonActionToStr } from '../utils/UtilsJson';
+import { DashboardContentProps } from '../utils/UtilsCommon';
 
-function CtrlAccel(props: { value: any;}) {
-    const {value} = props;
+function CtrlAccel(props: { value: any;} & DashboardContentProps) {
+    const {value,sendMessage} = props;
 
     const pram = {
         fontSize:"0.6rem",
@@ -29,6 +31,13 @@ function CtrlAccel(props: { value: any;}) {
         border:'none',
         boxShadow: '2px 2px 5px gray',
       }
+
+      const handleClickUp = () => {
+        sendMessage(CleateJsonActionToStr('btn_em','1'));
+      };
+      const handleClickDw = () => {
+        sendMessage(CleateJsonActionToStr('btn_em','1'));
+      };
     
       return (
         <div>

@@ -4,9 +4,11 @@ import {Box, Button, Grid} from '@mui/material';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import SubOutPrm from './SubOutPrm';
+import { CleateJsonActionToStr } from '../utils/UtilsJson';
+import { DashboardContentProps } from '../utils/UtilsCommon';
 
-function CtrlClutch(props: { value: any;}) {
-  const {value} = props;
+function CtrlClutch(props: { value: any;} & DashboardContentProps) {
+  const {value,sendMessage} = props;
   
   const pram = {
     fontSize:"0.6rem",
