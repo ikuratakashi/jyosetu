@@ -8,6 +8,8 @@ import * as UtilsCommon from '../utils/UtilsCommon';
  */
 export interface UtilsButtonProps {
     sx?: object;
+    variant?:string;
+    startIcon?:any;
     props: any;
     ButtonType: UtilsCommon.enmButtonType;
     children : React.ReactNode;
@@ -16,7 +18,7 @@ export interface UtilsButtonProps {
 /**
  *  ボタンを押し続けたときのメッセージを送信する時間間隔
  */
-const IntervalMs = 100;
+const IntervalMs = 200;
 
 /**
  * ボタン
@@ -26,7 +28,14 @@ const IntervalMs = 100;
  * @param ButtonType - ボタンの種類
  * @returns 
  */
-const UtilsButton: React.FC<UtilsButtonProps> = ({props, ButtonType, children}) => {
+const UtilsButton: React.FC<UtilsButtonProps> = ({
+    sx,
+    variant,
+    startIcon,
+    props,
+    ButtonType,
+    children,
+}) => {
 
     const {sendMessage} = props;
     const [intervalId, setIntervalId] = useState<number | null>(null);;
@@ -88,14 +97,17 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({props, ButtonType, children}) 
 
     return (
         <Button 
+            sx = {sx}
+            variant = {variant}
+            startIcon = {startIcon}
             {...props} 
-            onClick={onMouseClick}
-            onMouseDown={onMouseDown}
-            onMouseUp={onMouseUp}
-            onMouseLeave={onMouseUp}
-            onTouchStart={onMouseDown}
-            onTouchEnd={onMouseUp}
-            onTouchCancel={onMouseUp}
+            onClick = {onMouseClick}
+            onMouseDown = {onMouseDown}
+            onMouseUp = {onMouseUp}
+            onMouseLeave = {onMouseUp}
+            onTouchStart = {onMouseDown}
+            onTouchEnd = {onMouseUp}
+            onTouchCancel = {onMouseUp}
         >
             {children}
         </Button>

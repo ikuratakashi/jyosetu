@@ -5,10 +5,10 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; //→
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'; //↓
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; //←
 import SubOutPrm from './SubOutPrm';
-import { CleateJsonActionToStr } from '../utils/UtilsJson';
-import { DashboardContentProps } from '../utils/UtilsCommon';
+import * as UtilsCommon from '../utils/UtilsCommon';
+import UtilsButton from '../utils/UtilsButton';
 
-function CtrlDpad(props:{ valueUp: any,valueRight: any,valueDown: any,valueLeft: any;} & DashboardContentProps) {
+function CtrlDpad(props:{ valueUp: any,valueRight: any,valueDown: any,valueLeft: any;} & UtilsCommon.DashboardContentProps) {
   const {valueUp,valueRight,valueDown,valueLeft} = props;
   const pram = {
     fontSize:"10px",
@@ -76,7 +76,17 @@ function CtrlDpad(props:{ valueUp: any,valueRight: any,valueDown: any,valueLeft:
                 <Paper sx={PaperSx}>7</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowUpwardIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 前進ボタン */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={UtilsCommon.enmButtonType.move_fw}
+                  >
+                    <ArrowUpwardIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>9</Paper>
@@ -90,13 +100,33 @@ function CtrlDpad(props:{ valueUp: any,valueRight: any,valueDown: any,valueLeft:
                 <Paper sx={PaperSx}><SubOutPrm value={valueUp} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowBackIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/*ボタン 左*/}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={UtilsCommon.enmButtonType.move_left}
+                  >
+                    <ArrowBackIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>13</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowForwardIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/*ボタン 右*/}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={UtilsCommon.enmButtonType.move_right}
+                  >
+                    <ArrowForwardIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}><SubOutPrm value={valueUp} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
@@ -110,7 +140,17 @@ function CtrlDpad(props:{ valueUp: any,valueRight: any,valueDown: any,valueLeft:
                 <Paper sx={PaperSx}>17</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowDownwardIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/*ボタン 後進*/}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={UtilsCommon.enmButtonType.move_bk}
+                  >
+                    <ArrowDownwardIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>19</Paper>

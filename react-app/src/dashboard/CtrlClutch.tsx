@@ -4,10 +4,10 @@ import {Box, Button, Grid} from '@mui/material';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import SubOutPrm from './SubOutPrm';
-import { CleateJsonActionToStr } from '../utils/UtilsJson';
-import { DashboardContentProps } from '../utils/UtilsCommon';
+import * as UtilsCommon from '../utils/UtilsCommon';
+import UtilsButton from '../utils/UtilsButton';
 
-function CtrlClutch(props: { value: any;} & DashboardContentProps) {
+function CtrlClutch(props: { value: any;} & UtilsCommon.DashboardContentProps) {
   const {value,sendMessage} = props;
   
   const pram = {
@@ -38,20 +38,26 @@ function CtrlClutch(props: { value: any;} & DashboardContentProps) {
       <Grid container spacing={0.3}>
         <Grid item xs={0}>
           <Box sx={{mb:0.2}}>
-            <Button 
+            <UtilsButton 
               variant="outlined" 
               startIcon={<ArrowCircleUpIcon />} 
-              sx={ButtonSx}>
+              sx={ButtonSx}
+              props={props} 
+              ButtonType={UtilsCommon.enmButtonType.clutch_up}
+            >
               クラッチ
-            </Button>
+            </UtilsButton>
           </Box>
           <Box>
-            <Button 
+            <UtilsButton 
               variant="outlined" 
               startIcon={<ArrowCircleDownIcon />} 
-              sx={ButtonSx}>
+              sx={ButtonSx}
+              props={props} 
+              ButtonType={UtilsCommon.enmButtonType.clutch_dw}
+            >
               クラッチ
-            </Button>
+            </UtilsButton>
           </Box>
         </Grid>
         <Grid item sx={{height:pram.Param_h}}>

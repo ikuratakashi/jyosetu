@@ -3,11 +3,15 @@ import {Box, Button, Grid} from '@mui/material';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import SubOutPrm from './SubOutPrm';
-import { CleateJsonActionToStr } from '../utils/UtilsJson';
 import { DashboardContentProps } from '../utils/UtilsCommon';
+import * as UtilsCommon from '../utils/UtilsCommon';
+import UtilsButton from '../utils/UtilsButton';
 
 function CtrlAccel(props: { value: any;} & DashboardContentProps) {
-    const {value,sendMessage} = props;
+    const {value} = props;
+
+    const ButtonTypeUp : UtilsCommon.enmButtonType = UtilsCommon.enmButtonType.accel_up;
+    const ButtonTypeDw : UtilsCommon.enmButtonType = UtilsCommon.enmButtonType.accel_dw;
 
     const pram = {
         fontSize:"0.6rem",
@@ -32,32 +36,29 @@ function CtrlAccel(props: { value: any;} & DashboardContentProps) {
         boxShadow: '2px 2px 5px gray',
       }
 
-      const handleClickUp = () => {
-        sendMessage(CleateJsonActionToStr('btn_em','1'));
-      };
-      const handleClickDw = () => {
-        sendMessage(CleateJsonActionToStr('btn_em','1'));
-      };
-    
       return (
         <div>
           <Grid container spacing={0.3}>
             <Grid item xs={0}>
               <Box sx={{mb:0.3}}>
-                <Button 
+                <UtilsButton 
                   variant="outlined" 
+                  ButtonType={ButtonTypeUp}
                   startIcon={<ArrowCircleUpIcon />} 
+                  props={props}
                   sx={ButtonSx}>
                   アクセル
-                </Button>
+                </UtilsButton>
               </Box>
               <Box>
-                <Button 
+                <UtilsButton 
                   variant="outlined" 
+                  ButtonType={ButtonTypeDw}
                   startIcon={<ArrowCircleDownIcon />} 
+                  props={props}
                   sx={ButtonSx}>
                   アクセル
-                </Button>
+                </UtilsButton>
               </Box>
             </Grid>
             <Grid item sx={{height:pram.Param_h}}>

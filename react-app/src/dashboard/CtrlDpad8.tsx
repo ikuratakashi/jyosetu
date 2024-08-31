@@ -11,8 +11,8 @@ import NorthWestIcon from '@mui/icons-material/NorthWest'; //↖
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import SubOutPrm from './SubOutPrm';
 import { styled } from '@mui/material/styles';
-import { CleateJsonActionToStr } from '../utils/UtilsJson';
-import { DashboardContentProps } from '../utils/UtilsCommon';
+import * as UtilsCommon from '../utils/UtilsCommon';
+import UtilsButton from '../utils/UtilsButton';
 
 function CtrlDpad8(
   props:
@@ -27,8 +27,9 @@ function CtrlDpad8(
     valueLeftUp: any,
     valueLeftRight: any,
     valueUpDown: any,
+    AnalogSticType : UtilsCommon.enmAnalogSticType,
   }
-  & DashboardContentProps
+  & UtilsCommon.DashboardContentProps
   )
 {
 
@@ -43,6 +44,7 @@ function CtrlDpad8(
     valueLeftUp,
     valueLeftRight,
     valueUpDown,
+    AnalogSticType,
   } = props;
 
   //パラメタ出力部分のサイズなど
@@ -133,13 +135,55 @@ function CtrlDpad8(
                 <Paper sx={PaperSx}>6</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><NorthWestIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 8方向 左上 */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                        UtilsCommon.enmButtonType.chute_L_lup : 
+                        UtilsCommon.enmButtonType.chute_R_lup
+                    }
+                  >
+                    <NorthWestIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowUpwardIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 8方向 上 */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                      UtilsCommon.enmButtonType.chute_L_up :
+                      UtilsCommon.enmButtonType.chute_R_up
+                    }
+                  >
+                    <ArrowUpwardIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowOutwardIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 8方向 右上 */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                      UtilsCommon.enmButtonType.chute_L_rup :
+                      UtilsCommon.enmButtonType.chute_R_rup
+                    }
+                  >
+                    <ArrowOutwardIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>10</Paper>
@@ -150,13 +194,41 @@ function CtrlDpad8(
                 <Paper sx={PaperSx}><SubOutPrm value={valueLeft} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowBackIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 8方向 左 */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                      UtilsCommon.enmButtonType.chute_L_left :
+                      UtilsCommon.enmButtonType.chute_R_left
+                    }
+                  >
+                    <ArrowBackIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>13</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowForwardIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 8方向 右 */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                      UtilsCommon.enmButtonType.chute_L_right :
+                      UtilsCommon.enmButtonType.chute_R_right
+                    }
+                  >
+                    <ArrowForwardIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}><SubOutPrm value={valueRight} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
@@ -168,13 +240,55 @@ function CtrlDpad8(
                 <Paper sx={PaperSx}>16</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><SouthWestIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 8方向 左下 */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                      UtilsCommon.enmButtonType.chute_L_ldw :
+                      UtilsCommon.enmButtonType.chute_R_ldw
+                    }
+                  >
+                    <SouthWestIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><ArrowDownwardIcon /></Button></Paper>
+                {/* 8方向 下 */}
+                <Paper sx={PaperSx}>
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                      UtilsCommon.enmButtonType.chute_L_dw :
+                      UtilsCommon.enmButtonType.chute_R_dw
+                    }
+                  >
+                    <ArrowDownwardIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><Button sx={ButtonSx} variant="contained"><SouthEastIcon /></Button></Paper>
+                <Paper sx={PaperSx}>
+                  {/* 8方向 右下 */}
+                  <UtilsButton 
+                    sx={ButtonSx} 
+                    variant="contained"
+                    props={props} 
+                    ButtonType={
+                      AnalogSticType == UtilsCommon.enmAnalogSticType.left ? 
+                      UtilsCommon.enmButtonType.chute_L_rdw :
+                      UtilsCommon.enmButtonType.chute_R_rdw
+                    }
+                  >
+                    <SouthEastIcon />
+                  </UtilsButton>
+                </Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>20</Paper>

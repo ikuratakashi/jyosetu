@@ -110,17 +110,18 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
 
               {/* 8方向キー */}
               <CtrlDpad8 
-              valueUp={"UP"}
-              valueUpRithg={"UR"}
-              valueRight={"R"}
-              valueRightDown={"RD"}
-              valueDown={"D"}
-              valueLeftDown={"LD"}
-              valueLeft={"L"}
-              valueLeftUp={"LU"}
-              valueLeftRight={"LRLR"}
-              valueUpDown={"DWDW"}
-              sendMessage={sendMessage}
+                valueUp={"UP"}
+                valueUpRithg={"UR"}
+                valueRight={"R"}
+                valueRightDown={"RD"}
+                valueDown={"D"}
+                valueLeftDown={"LD"}
+                valueLeft={"L"}
+                valueLeftUp={"LU"}
+                valueLeftRight={"LRLR"}
+                valueUpDown={"DWDW"}
+                sendMessage={sendMessage}
+                AnalogSticType={UtilsCommon.enmAnalogSticType.left}
               />
             </Grid>
             <Grid item sx={{width:'30px'}}></Grid>
@@ -135,17 +136,18 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
             >
               {/* 8方向キー */}
               <CtrlDpad8 
-              valueUp={"UP"}
-              valueUpRithg={"UR"}
-              valueRight={"R"}
-              valueRightDown={"RD"}
-              valueDown={"D"}
-              valueLeftDown={"LD"}
-              valueLeft={"L"}
-              valueLeftUp={"LU"}
-              valueLeftRight={"LRLR"}
-              valueUpDown={"DWDW"}
-              sendMessage={sendMessage}
+                valueUp={"UP"}
+                valueUpRithg={"UR"}
+                valueRight={"R"}
+                valueRightDown={"RD"}
+                valueDown={"D"}
+                valueLeftDown={"LD"}
+                valueLeft={"L"}
+                valueLeftUp={"LU"}
+                valueLeftRight={"LRLR"}
+                valueUpDown={"DWDW"}
+                sendMessage={sendMessage}
+                AnalogSticType={UtilsCommon.enmAnalogSticType.right}
               />
             </Grid>
             <Grid item xs></Grid>

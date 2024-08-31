@@ -1,8 +1,8 @@
 import React from 'react'
 import {Box, Button, Grid, Paper} from '@mui/material';
 import SubOutPrm from './SubOutPrm';
-import { CleateJsonActionToStr } from '../utils/UtilsJson';
-import { DashboardContentProps } from '../utils/UtilsCommon';
+import * as UtilsCommon from '../utils/UtilsCommon';
+import UtilsButton from '../utils/UtilsButton';
 
 //ボタン
 ///三角
@@ -14,7 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 //四角
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 
-function CtrlButton(props: { value: any;} & DashboardContentProps) {
+function CtrlButton(props: { value: any;} & UtilsCommon.DashboardContentProps) {
 
     const {value} = props;
 
@@ -134,12 +134,15 @@ function CtrlButton(props: { value: any;} & DashboardContentProps) {
                     <Paper sx={PaperSx}>
                         {/*ボタン 三角*/}
                         <Box>
-                            <Button 
-                            variant="outlined" 
-                            startIcon={<ChangeHistoryIcon sx={{ color: pram.BtnCol_Sankaku }}/>} 
-                            sx={ButtonSx}>
+                            <UtilsButton 
+                                variant="outlined" 
+                                startIcon={<ChangeHistoryIcon sx={{ color: pram.BtnCol_Sankaku }}/>} 
+                                sx={ButtonSx}
+                                props={props} 
+                                ButtonType={UtilsCommon.enmButtonType.btn_sankaku}
+                            >
                             ---
-                            </Button>
+                            </UtilsButton>
                         </Box>
                     </Paper>
                 </Grid>
@@ -163,12 +166,15 @@ function CtrlButton(props: { value: any;} & DashboardContentProps) {
                     <Paper sx={PaperSx}>
                         {/*ボタン 四角*/}
                         <Box>
-                            <Button 
+                            <UtilsButton 
                             variant="outlined" 
                             startIcon={<CropSquareIcon sx={{ color: pram.BtnCol_Shikaku }}/>} 
-                            sx={ButtonSx}>
+                            sx={ButtonSx}
+                            props={props} 
+                            ButtonType={UtilsCommon.enmButtonType.btn_sikaku}
+                            >
                             ---
-                            </Button>
+                            </UtilsButton>
                         </Box>
                     </Paper>
                 </Grid>
@@ -185,12 +191,15 @@ function CtrlButton(props: { value: any;} & DashboardContentProps) {
                     <Paper sx={PaperSx}>
                         {/*ボタン 丸*/}
                         <Box>
-                            <Button 
+                            <UtilsButton 
                             variant="outlined" 
                             startIcon={<TripOriginIcon sx={{ color: pram.BtnCol_Maru }}/>} 
-                            sx={ButtonSx}>
+                            sx={ButtonSx}
+                            props={props} 
+                            ButtonType={UtilsCommon.enmButtonType.btn_on}
+                            >
                             回転
-                            </Button>
+                            </UtilsButton>
                         </Box>
                     </Paper>
                 </Grid>
@@ -214,12 +223,15 @@ function CtrlButton(props: { value: any;} & DashboardContentProps) {
                     <Paper sx={PaperSx}>
                         {/*ボタン バツ*/}
                         <Box>
-                            <Button 
+                            <UtilsButton 
                             variant="outlined" 
                             startIcon={<CloseIcon sx={{ color: pram.BtnCol_Batu }}/>} 
-                            sx={ButtonSx}>
+                            sx={ButtonSx}
+                            props={props} 
+                            ButtonType={UtilsCommon.enmButtonType.btn_off}
+                            >
                             停止
-                            </Button>
+                            </UtilsButton>
                         </Box>
                     </Paper>
                 </Grid>
