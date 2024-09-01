@@ -10,6 +10,7 @@ import CtrlButton from './CtrlButton';
 import CtrlEStop from './CtrlEStop';
 import CtrlDpad8 from './CtrlDpad8';
 import * as UtilsCommon from '../utils/UtilsCommon';
+import GameComponent from './CtrlGamePad';
 
 function Controller(props: UtilsCommon.DashboardContentProps) {
 
@@ -155,9 +156,10 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
 
         </Paper>
       </Grid>
-      <Grid item style={{ width: '200px', height: '100%' }}>
+      <Grid item style={{ width: '300px', height: '100%' }}>
         <Paper sx={{ backgroundColor: 'lightgreen', height: '100%' }}>
           2列目: 200px
+          <GameComponent />
         </Paper>
       </Grid>
       <Grid item xs sx={{ height: '100%' }}>

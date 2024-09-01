@@ -24,8 +24,6 @@ import Home from './Home';
 import Controller from './Controller';
 import { useState } from 'react';
 
-
-
 function Copyright(props: any) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
