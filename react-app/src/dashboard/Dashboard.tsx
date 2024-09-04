@@ -18,7 +18,7 @@ import { BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-rou
 
 import Home from './Home';
 import Controller from './Controller';
-import { DashboardContentProps } from '../utils/UtilsCommon';
+import * as UtilsCommon from '../utils/UtilsCommon';
 
 function Copyright(props: any) {
   return (
@@ -106,9 +106,7 @@ const mdTheme = createTheme(
 );
 
 
-function DashboardContent(props: DashboardContentProps) {
-
-  const {sendMessage,NetworkManager} = props
+function DashboardContent(props: UtilsCommon.DashboardContentProps) {
 
   const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => {
@@ -194,13 +192,13 @@ function DashboardContent(props: DashboardContentProps) {
 
               <Router>
                 <Routes>
-                  <Route path="/" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
+                  <Route path="/" element={<Controller {...props}/>} />
                   <Route path="/home" element={<Home />} />
-                  <Route path="/controller" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
+                  <Route path="/controller" element={<Controller {...props}/>} />
 
-                  <Route path="/jyosetu" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
+                  <Route path="/jyosetu" element={<Controller {...props}/>} />
                   <Route path="/jyosetu/home" element={<Home />} />
-                  <Route path="/jyosetu/controller" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
+                  <Route path="/jyosetu/controller" element={<Controller {...props}/>} />
 
                 </Routes>
               </Router>
@@ -217,11 +215,6 @@ function DashboardContent(props: DashboardContentProps) {
   );
 }
 
-export default function Dashboard(props:DashboardContentProps) {
-  const 
-  {
-    sendMessage,
-    NetworkManager
-  } = props;
-  return <DashboardContent sendMessage={sendMessage} NetworkManager={NetworkManager}/>;
+export default function Dashboard(props:UtilsCommon.DashboardContentProps) {
+  return <DashboardContent {...props}/>;
 }

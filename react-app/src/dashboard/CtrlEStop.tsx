@@ -5,8 +5,7 @@ import SubOutPrm from './SubOutPrm';
 import * as UtilsCommon from '../utils/UtilsCommon';
 import UtilsButton from '../utils/UtilsButton';
 
-function CtrlEStop(props: { value: any} & UtilsCommon.DashboardContentProps) {
-    const {value} = props;
+function CtrlEStop(props: UtilsCommon.DashboardContentProps) {
     const pram = {
         Param_h:"40px",
         Param_w:"200px",
@@ -26,7 +25,7 @@ function CtrlEStop(props: { value: any} & UtilsCommon.DashboardContentProps) {
         </Grid>
         <Grid container spacing={0.3}>
             <Grid item sx={{height:pram.Param_h}}>
-                <SubOutPrm value={value} sx={{ height: pram.Param_h, width:pram.Param_w}}/>
+                <SubOutPrm sx={{ height: pram.Param_h, width:pram.Param_w}}/>
             </Grid>
         </Grid>
     </Grid>

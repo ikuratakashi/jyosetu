@@ -2,8 +2,8 @@ import React from 'react'
 import { Box } from '@mui/material';
 import { CenterFocusWeak } from '@mui/icons-material';
 
-function SubOutPrm(props: { value: any; sx: any; }) {
-  const {value,sx} = props;
+function SubOutPrm(props: { sx: any; }) {
+  const {sx} = props;
   return (
     <div>
       <Box
@@ -20,7 +20,6 @@ function SubOutPrm(props: { value: any; sx: any; }) {
         ...sx,
       }}
     >
-      {value == "" ? "　" : value}
     </Box>
     </div>
   )

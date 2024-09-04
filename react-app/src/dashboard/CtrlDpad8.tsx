@@ -17,35 +17,16 @@ import UtilsButton from '../utils/UtilsButton';
 function CtrlDpad8(
   props:
   {
-    valueUp: any,
-    valueUpRithg: any,
-    valueRight: any,
-    valueRightDown: any,
-    valueDown: any,
-    valueLeftDown: any,
-    valueLeft: any,
-    valueLeftUp: any,
-    valueLeftRight: any,
-    valueUpDown: any,
-    AnalogSticType : UtilsCommon.enmAnalogSticType,
+    analogstictype : UtilsCommon.enmAnalogSticType,
   }
   & UtilsCommon.DashboardContentProps
   )
 {
 
   const {
-    valueUp,
-    valueUpRithg,
-    valueRight,
-    valueRightDown,
-    valueDown,
-    valueLeftDown,
-    valueLeft,
-    valueLeftUp,
-    valueLeftRight,
-    valueUpDown,
-    AnalogSticType,
+    analogstictype,
   } = props;
+  const AnalogSticType = analogstictype;
 
   //パラメタ出力部分のサイズなど
   const pram = {
@@ -115,19 +96,19 @@ function CtrlDpad8(
           <Grid container spacing={0}>
             <Grid container spacing={0.3} sx={{mb:0.1}}>
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueLeftUp} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>2</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueUp} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>4</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueUpRithg} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
             </Grid>
             <Grid container spacing={0.3} sx={{mb:0.3}}> 
@@ -191,7 +172,7 @@ function CtrlDpad8(
             </Grid>
             <Grid container spacing={0.3} sx={{mb:0.3}}>
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueLeft} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>
@@ -231,7 +212,7 @@ function CtrlDpad8(
                 </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueRight} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
             </Grid>
 
@@ -297,19 +278,19 @@ function CtrlDpad8(
 
             <Grid container spacing={0.3} sx={{mb:1.0}}> 
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueLeftDown} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>22</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueDown} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
               <Grid item>
                 <Paper sx={PaperSx}>24</Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperSx}><SubOutPrm value={valueRightDown} sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
+                <Paper sx={PaperSx}><SubOutPrm sx={{color: "black", height: pram.Param_h, width:pram.Param_w}}/></Paper>
               </Grid>
             </Grid>
 
@@ -321,7 +302,7 @@ function CtrlDpad8(
                 <Paper sx={PaperOutSx}><SyncAltIcon /></Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperOutSx}><SubOutPrm value={valueLeftRight} sx={{color: "black", height: pram.ParamOut_h, width:pram.ParamOut_w}}/></Paper>
+                <Paper sx={PaperOutSx}><SubOutPrm sx={{color: "black", height: pram.ParamOut_h, width:pram.ParamOut_w}}/></Paper>
               </Grid>
             </Grid>
 
@@ -333,7 +314,7 @@ function CtrlDpad8(
                 <Paper sx={PaperOutSx}><SyncAltIcon90 /></Paper>
               </Grid>
               <Grid item>
-                <Paper sx={PaperOutSx}><SubOutPrm value={valueUpDown} sx={{color: "black", height: pram.ParamOut_h, width:pram.ParamOut_w}}/></Paper>
+                <Paper sx={PaperOutSx}><SubOutPrm sx={{color: "black", height: pram.ParamOut_h, width:pram.ParamOut_w}}/></Paper>
               </Grid>
             </Grid>
 

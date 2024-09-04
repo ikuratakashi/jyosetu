@@ -7,9 +7,8 @@ import SubOutPrm from './SubOutPrm';
 import * as UtilsCommon from '../utils/UtilsCommon';
 import UtilsButton from '../utils/UtilsButton';
 
-function CtrlClutch(props: { value: any;} & UtilsCommon.DashboardContentProps) {
-  const {value,sendMessage} = props;
-  
+function CtrlClutch(props:UtilsCommon.DashboardContentProps) {
+
   const pram = {
     fontSize:"0.6rem",
     Button_h:"40px",
@@ -61,7 +60,7 @@ function CtrlClutch(props: { value: any;} & UtilsCommon.DashboardContentProps) {
           </Box>
         </Grid>
         <Grid item sx={{height:pram.Param_h}}>
-          <SubOutPrm value={value} sx={{ height: pram.Param_h, width:pram.Param_w}}/>
+          <SubOutPrm sx={{ height: pram.Param_h, width:pram.Param_w}}/>
         </Grid>
       </Grid>
     </div>

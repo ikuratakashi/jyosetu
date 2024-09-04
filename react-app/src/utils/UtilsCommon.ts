@@ -11,16 +11,9 @@
 export interface DashboardContentProps {
 
     /**
-     * websocketへ送信する
-     * @param message 送信するメッセージ
-     * @returns void
-     */
-    sendMessage: (message: string) => void;
-
-    /**
      * ラズパイとの通信用のwebsocket本体
      */
-    NetworkManager?: NetworkManager | null;
+    networkmanager?: NetworkManager | null;
 
 }
 

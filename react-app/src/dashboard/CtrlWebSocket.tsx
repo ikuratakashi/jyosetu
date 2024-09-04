@@ -1,11 +1,15 @@
-import React from 'react'
+import React, { useState, useEffect  } from 'react'
 import {Box, Button, Grid} from '@mui/material';
 import {CtrlWebSocketProps} from '../utils/UtilsNetworkManager'
 import { Height } from '@mui/icons-material';
 import {enmConnectCorlor} from '../utils/UtilsCommon'
+import * as UtilsCommon from '../utils/UtilsCommon'
 
-function CtrlWebSocket(props : CtrlWebSocketProps) {
-    const{PortNo,ServerIp} = props;
+
+function CtrlWebSocket(props: UtilsCommon.DashboardContentProps) {
+
+    const{networkmanager} = props;
+    const NetWorkManager = networkmanager;
 
     const ButtonSx = {
         fontSize: "11px",
@@ -29,6 +33,22 @@ function CtrlWebSocket(props : CtrlWebSocketProps) {
         border:'0px solid black'
     }
     
+    const [wsUri, setWsUri] = useState('');
+
+    useEffect(() => {
+        if (NetWorkManager?.WsUri) {
+            setWsUri(NetWorkManager.WsUri);
+        }
+    }, [NetWorkManager]);
+
+    //txtWsUriの値に変更があった時の処理
+    const handleChange_txtWsUri = (event:any) => {
+        setWsUri(event.target.value);
+        if(NetWorkManager){
+            NetWorkManager.SocketServerDataParsSet(event.target.value);
+        }
+    };
+
     return (
         <Grid container sx={GridSx}>
 
@@ -39,13 +59,13 @@ function CtrlWebSocket(props : CtrlWebSocketProps) {
                 </Grid>
                 <Grid container sx={{...GridSx, width:"100%"}}>
                     <Grid item sx={GridSx}>
-                        <input value={`ws://${ServerIp}:${PortNo}`} style={{height:"100%"}}/>
+                        <input id="txtWsUri" value={wsUri} onChange={handleChange_txtWsUri} style={{height:"100%"}}/>
                     </Grid>
                     <Grid item sx={GridSx}>
-                        <Button sx={{...ButtonSx,margin:"0px 2px"}}>接続</Button>
+                        <Button id="btnConnect" onClick={NetWorkManager?.ConnectWs.bind(NetWorkManager)} sx={{...ButtonSx,margin:"0px 2px"}}>接続</Button>
                     </Grid>
-                    <Grid item sx={{...GridSx,backgroundColor:enmConnectCorlor.disconnect,width:'30px'}}></Grid>
-                    <Grid item sx={{...GridSx,margin:"0px 3px",height:"100%" ,display: 'flex', alignItems: 'center'}}>Connect None</Grid>
+                    <Grid item id="grdConnectColor" sx={{...GridSx,backgroundColor:enmConnectCorlor.disconnect,width:'30px'}}></Grid>
+                    <Grid item id="grdConnectMsg" sx={{...GridSx,margin:"0px 3px",height:"100%" ,display: 'flex', alignItems: 'center'}}>Connect None</Grid>
                 </Grid>
             </Grid>
             <Grid item xs sx={{...GridSx}}></Grid>

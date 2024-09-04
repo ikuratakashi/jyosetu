@@ -14,9 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 //四角
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 
-function CtrlButton(props: { value: any;} & UtilsCommon.DashboardContentProps) {
-
-    const {value} = props;
+function CtrlButton(props: UtilsCommon.DashboardContentProps) {
 
     const pram = {
       fontSize:"0.75rem",
@@ -106,7 +104,7 @@ function CtrlButton(props: { value: any;} & UtilsCommon.DashboardContentProps) {
                 </Grid>
                 <Grid item>
                     {/* 数値 */}
-                    <Paper sx={PaperSx}><SubOutPrm value={value} sx={SubOutPrmSx}/></Paper>
+                    <Paper sx={PaperSx}><SubOutPrm sx={SubOutPrmSx}/></Paper>
                 </Grid>
                 <Grid item>
                     <Paper sx={PaperSx}>5</Paper>
@@ -259,7 +257,7 @@ function CtrlButton(props: { value: any;} & UtilsCommon.DashboardContentProps) {
                 </Grid>
                 <Grid item>
                     {/* 数値 */}
-                    <Paper sx={PaperSx}><SubOutPrm value={value} sx={SubOutPrmSx}/></Paper>
+                    <Paper sx={PaperSx}><SubOutPrm sx={SubOutPrmSx}/></Paper>
                 </Grid>
                 <Grid item>
                     <Paper sx={PaperSx}>5</Paper>

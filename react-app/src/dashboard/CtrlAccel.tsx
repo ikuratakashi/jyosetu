@@ -7,8 +7,7 @@ import { DashboardContentProps } from '../utils/UtilsCommon';
 import * as UtilsCommon from '../utils/UtilsCommon';
 import UtilsButton from '../utils/UtilsButton';
 
-function CtrlAccel(props: { value: any;} & DashboardContentProps) {
-    const {value} = props;
+function CtrlAccel(props: DashboardContentProps) {
 
     const ButtonTypeUp : UtilsCommon.enmButtonType = UtilsCommon.enmButtonType.accel_up;
     const ButtonTypeDw : UtilsCommon.enmButtonType = UtilsCommon.enmButtonType.accel_dw;
@@ -62,7 +61,7 @@ function CtrlAccel(props: { value: any;} & DashboardContentProps) {
               </Box>
             </Grid>
             <Grid item sx={{height:pram.Param_h}}>
-              <SubOutPrm value={value} sx={{ height: pram.Param_h, width:pram.Param_w}}/>
+              <SubOutPrm sx={{ height: pram.Param_h, width:pram.Param_w}}/>
             </Grid>
           </Grid>
         </div>

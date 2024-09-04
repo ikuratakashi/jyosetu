@@ -64,7 +64,8 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
     } catch (error) {
     }
     
-    const {NetworkManager}: { NetworkManager: UtilsNetworkManager.NetworkManager} = props;
+    const {networkmanager}: { networkmanager: UtilsNetworkManager.NetworkManager} = props;
+    const NetworkManager = networkmanager;
     const [intervalId, setIntervalId] = useState<number | null>(null);;
 
     /**
@@ -78,7 +79,6 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
                             if (NetworkManager){
                                 NetworkManager.sendWsMessage(CleateJsonActionToStr(ButtonType,1));
                             } 
-                            //sendMessage(CleateJsonActionToStr(ButtonType,1));
                         }
                         , IntervalMs
                     );

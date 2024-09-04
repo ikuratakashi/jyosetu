@@ -4,7 +4,7 @@ import asyncio
 import websockets  # type: ignore
 import socket
 
-port = 1000
+port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
 
 async def handler(websocket, path):
