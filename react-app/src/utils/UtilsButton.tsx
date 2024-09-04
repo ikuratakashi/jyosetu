@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { CleateJsonActionToStr } from '../utils/UtilsJson';
 import * as UtilsCommon from '../utils/UtilsCommon';
 import { useGamepad } from './useGamepad';
-import GameComponent from '../dashboard/CtrlGamePad'
+import * as UtilsNetworkManager from './UtilsNetworkManager';
 
 /**
  * ボタンの引数のインターフェース
@@ -12,7 +12,7 @@ export interface UtilsButtonProps {
     sx?: object;
     variant?:string;
     startIcon?:any;
-    props: any;
+    props: any & UtilsCommon.DashboardContentProps;
     ButtonType: UtilsCommon.enmButtonType;
     children : React.ReactNode;
 }
@@ -64,7 +64,7 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
     } catch (error) {
     }
     
-    const {sendMessage} = props;
+    const {NetworkManager}: { NetworkManager: UtilsNetworkManager.NetworkManager} = props;
     const [intervalId, setIntervalId] = useState<number | null>(null);;
 
     /**
@@ -75,7 +75,10 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
         const id = setInterval
                     (
                         () => {
-                            sendMessage(CleateJsonActionToStr(ButtonType,1));
+                            if (NetworkManager){
+                                NetworkManager.sendWsMessage(CleateJsonActionToStr(ButtonType,1));
+                            } 
+                            //sendMessage(CleateJsonActionToStr(ButtonType,1));
                         }
                         , IntervalMs
                     );
@@ -88,7 +91,10 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
      * サーバへ、ボタンを押したときのメッセージを送信する
      */
     const onMouseClick = () =>{
-        sendMessage(CleateJsonActionToStr(ButtonType,1));
+        if (NetworkManager){
+            NetworkManager.sendWsMessage(CleateJsonActionToStr(ButtonType,1));
+        } 
+        //sendMessage(CleateJsonActionToStr(ButtonType,1));
     }
 
     /**

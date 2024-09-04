@@ -9,20 +9,16 @@ import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import Link from '@mui/material/Link';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems } from './listItems';
 import { BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-router-dom';
 
 import Home from './Home';
 import Controller from './Controller';
-import { useState } from 'react';
+import { DashboardContentProps } from '../utils/UtilsCommon';
 
 function Copyright(props: any) {
   return (
@@ -109,13 +105,10 @@ const mdTheme = createTheme(
   }  
 );
 
-interface DashboardContentProps {
-  sendMessage: (message: string) => void;
-}
 
 function DashboardContent(props: DashboardContentProps) {
 
-  const {sendMessage} = props
+  const {sendMessage,NetworkManager} = props
 
   const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => {
@@ -201,13 +194,13 @@ function DashboardContent(props: DashboardContentProps) {
 
               <Router>
                 <Routes>
-                  <Route path="/" element={<Controller sendMessage={sendMessage}/>} />
+                  <Route path="/" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
                   <Route path="/home" element={<Home />} />
-                  <Route path="/controller" element={<Controller sendMessage={sendMessage}/>} />
+                  <Route path="/controller" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
 
-                  <Route path="/jyosetu" element={<Controller sendMessage={sendMessage}/>} />
+                  <Route path="/jyosetu" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
                   <Route path="/jyosetu/home" element={<Home />} />
-                  <Route path="/jyosetu/controller" element={<Controller sendMessage={sendMessage}/>} />
+                  <Route path="/jyosetu/controller" element={<Controller sendMessage={sendMessage} NetworkManager={NetworkManager}/>} />
 
                 </Routes>
               </Router>
@@ -225,6 +218,10 @@ function DashboardContent(props: DashboardContentProps) {
 }
 
 export default function Dashboard(props:DashboardContentProps) {
-  const {sendMessage} = props;
-  return <DashboardContent sendMessage={sendMessage}/>;
+  const 
+  {
+    sendMessage,
+    NetworkManager
+  } = props;
+  return <DashboardContent sendMessage={sendMessage} NetworkManager={NetworkManager}/>;
 }

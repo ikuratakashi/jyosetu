@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardContent from './dashboard/Dashboard';
+import * as UtilsNetworkManager from './utils/UtilsNetworkManager';
 
 const App = () => {
 
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState<string>('');
   const socketRef = useRef<WebSocket | null>(null);
+
+  const NetWorkRef = useRef<UtilsNetworkManager.NetworkManager | null>(null);
 
   useEffect(() => {
     // WebSocket接続を確立
@@ -21,6 +24,9 @@ const App = () => {
     socket.onerror = (error) => {
       console.error('WebSocket error: ', error);
     };
+
+    // ネットワーク関連の管理マネージャ
+    NetWorkRef.current = new UtilsNetworkManager.NetworkManager();
 
     // コンポーネントがアンマウントされた時にWebSocketを閉じる
     return () => {
@@ -38,7 +44,7 @@ const App = () => {
     }
   };
 
-  return <DashboardContent sendMessage={sendMessage}/>;
+  return <DashboardContent sendMessage={sendMessage} NetworkManager={NetWorkRef.current}/>;
 
 };
 

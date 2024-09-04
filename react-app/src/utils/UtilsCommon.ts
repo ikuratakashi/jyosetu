@@ -2,10 +2,11 @@
  * @ikuratakashi
  * 共通モジュール
  */
- import { CleateJsonActionToStr } from './UtilsJson';
+ import { NetworkManager } from './UtilsNetworkManager';
+ import { useRef } from 'react';
 
 /**
- * ダッシュボードからのパラメタのインタフェース
+ * ダッシュボードからのパラメタのインターフェース
  */
 export interface DashboardContentProps {
 
@@ -15,6 +16,11 @@ export interface DashboardContentProps {
      * @returns void
      */
     sendMessage: (message: string) => void;
+
+    /**
+     * ラズパイとの通信用のwebsocket本体
+     */
+    NetworkManager?: NetworkManager | null;
 
 }
 
@@ -171,3 +177,20 @@ export enum enmButtonType{
     btn_em      = 'btn_em',
 }
 
+/**
+ * 接続状態の色
+ */
+export enum enmConnectCorlor{
+    /**
+     * 未接続
+     */
+    disconnect = 'red',
+    /**
+     * 接続された
+     */
+    connect = 'green',
+    /**
+     * 接続処理実行中
+     */
+    connecting = 'yellow',
+}

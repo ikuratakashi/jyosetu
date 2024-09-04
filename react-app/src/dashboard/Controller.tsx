@@ -11,27 +11,31 @@ import CtrlEStop from './CtrlEStop';
 import CtrlDpad8 from './CtrlDpad8';
 import * as UtilsCommon from '../utils/UtilsCommon';
 import GameComponent from './CtrlGamePad';
+import CtrlWebSocket from './CtrlWebSocket';
 
 function Controller(props: UtilsCommon.DashboardContentProps) {
-
-  const {sendMessage} = props
+  
+  const {sendMessage,NetworkManager} = props
 
   return (
     <Grid container spacing={1} sx={{ height: '100%' }}>
       <Grid item style={{ width: '550px', height: '100%' }}>
         <Paper sx={{ backgroundColor: 'lightblue', height: '100%' }}>
-
+          {/* ラズパイのサーバー接続 */}
+          <Grid container sx={{width:'100%',mb:1}}>
+            <CtrlWebSocket ServerIp={"127.0.0.1"} PortNo={50000}></CtrlWebSocket>
+          </Grid>
           {/* クラッチとアクセル */}
           <Grid container sx={{width: '100%',mb:1}}>
             <Grid item xs></Grid>
             <Grid item sx={{width:'150px'}}>
               {/* クラッチ */}
-              <CtrlClutch value={"0"} sendMessage={sendMessage}/>
+              <CtrlClutch value={"0"} sendMessage={sendMessage} NetworkManager={NetworkManager}/>
             </Grid>
             <Grid item sx={{width:'70px'}}></Grid>
             <Grid item sx={{width:'150px'}}>
               {/* アクセル */}
-              <CtrlAccel value={"0"} sendMessage={sendMessage}/>
+              <CtrlAccel value={"0"} sendMessage={sendMessage} NetworkManager={NetworkManager}/>
             </Grid>
             <Grid item xs></Grid>
           </Grid>
@@ -55,7 +59,7 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
                       }}
             >
               {/* 十字キー */}
-              <CtrlDpad valueUp={"0"} valueRight={"0"} valueDown={"0"} valueLeft={"0"} sendMessage={sendMessage}/>
+              <CtrlDpad valueUp={"0"} valueRight={"0"} valueDown={"0"} valueLeft={"0"} sendMessage={sendMessage} NetworkManager={NetworkManager}/>
             </Grid>
             <Grid item sx={{width:'30px'}}></Grid>
             <Grid item 
@@ -68,7 +72,7 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
                       }}
             >
               {/* ボタン */}
-              <CtrlButton value={"0"} sendMessage={sendMessage}/>
+              <CtrlButton value={"0"} sendMessage={sendMessage} NetworkManager={NetworkManager}/>
             </Grid>
             <Grid item xs></Grid>
           </Grid>
@@ -85,7 +89,7 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
                         justifyContent: 'center' // 水平方向の中央揃え
                       }}>
               {/* 緊急停止ボタン */}
-              <CtrlEStop value={"0"} sendMessage={sendMessage}/>
+              <CtrlEStop value={"0"} sendMessage={sendMessage} NetworkManager={NetworkManager}/>
             </Grid>
             <Grid item xs></Grid>
           </Grid>
@@ -122,6 +126,7 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
                 valueLeftRight={"LRLR"}
                 valueUpDown={"DWDW"}
                 sendMessage={sendMessage}
+                NetworkManager={NetworkManager}
                 AnalogSticType={UtilsCommon.enmAnalogSticType.left}
               />
             </Grid>
@@ -148,6 +153,7 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
                 valueLeftRight={"LRLR"}
                 valueUpDown={"DWDW"}
                 sendMessage={sendMessage}
+                NetworkManager={NetworkManager}
                 AnalogSticType={UtilsCommon.enmAnalogSticType.right}
               />
             </Grid>
