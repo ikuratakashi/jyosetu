@@ -87,7 +87,7 @@ export class NetworkManager {
         // eslint-disable-next-line no-restricted-globals
         const isSSL = location.protocol === 'https:';
         const wsProtocol = isSSL ? 'wss' : 'ws';
-        this.ServerData.Protocol = wsProtocol;
+        this.ServerData.Protocol = wsProtocol + ":";
         // eslint-disable-next-line no-restricted-globals
         const beforeColon = location.host.split(':')[0];
         this.ServerData.ServerIp = beforeColon;
@@ -102,7 +102,7 @@ export class NetworkManager {
      */
     InitSocketServer(pServerParam:CtrlWebSocketProps){
         this.ServerData = pServerParam;
-        this.WsUri = `${this.ServerData.Protocol}://${this.ServerData.ServerIp}:${this.ServerData.PortNo}`
+        this.WsUri = `${this.ServerData.Protocol}//${this.ServerData.ServerIp}:${this.ServerData.PortNo}`
     }
 
     /**
@@ -110,11 +110,15 @@ export class NetworkManager {
      * @param pUrl - パースする値
      */
     SocketServerDataParsSet(pUrl:string){
-        const urlParts = new URL(pUrl);
-        this.ServerData.Protocol = urlParts.protocol;
-        this.ServerData.ServerIp = urlParts.hostname;
-        this.ServerData.PortNo = urlParts.port;
-        this.InitSocketServer(this.ServerData);
+        try{
+            const urlParts = new URL(pUrl);
+            this.ServerData.Protocol = urlParts.protocol;
+            this.ServerData.ServerIp = urlParts.hostname;
+            this.ServerData.PortNo = urlParts.port;
+            this.InitSocketServer(this.ServerData);
+        }catch{
+
+        }
     }
 
     /**

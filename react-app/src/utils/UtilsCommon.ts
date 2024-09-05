@@ -181,7 +181,7 @@ export enum enmConnectCorlor{
     /**
      * 接続された
      */
-    connect = 'green',
+    connect = 'lime',
     /**
      * 接続処理実行中
      */
