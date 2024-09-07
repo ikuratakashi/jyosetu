@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect  } from 'react'
 import {Box, Button, Grid} from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
 import * as UtilsCommon from '../utils/UtilsCommon'
+import * as UtilsMomoManager from '../utils/UtilsMomoManager';
 
 function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
 
@@ -77,6 +78,7 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
     const [conServerSelectIsReadOnly,setServerSelectIsReadOnly] = useState(false);
     const [conServerSelectValue,setServerSelectValue] = useState('none');
     const [conCodecsSelectValue,setCodecsSelectValue] = useState('H264');
+    const [conVideo,setVideoValue] = useState<UtilsMomoManager.MomoVideo | undefined>(undefined);
 
     //各オブジェクトを操作するときの変数を定義
     //※各コントロールのrefに設定することで変数を経由して操作できる
@@ -87,13 +89,55 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
     //接続ボタンのクリック時の処理
     const handleOnClick_btnConnection = (event:any) =>{
         if(conIsConnection == true){
+
             //接続時 → 切断へ
+
+            if(conVideo){
+                conVideo?.disconnect();
+                MomoManager?.removeVideItem(conVideo);
+                setVideoValue(undefined);
+            }
+
             setIsConnection(false);
             setBgColor(UtilsCommon.enmConnectCorlor.disconnect);
             setConnectButton({title:"接続",enable:true})
             setServerSelectIsReadOnly(false);
+
         }else{
             //切断時 → 接続へ
+
+            let MomoServerValue : UtilsMomoManager.MomoServer | undefined = undefined;
+            if(MomoManager?.ServerItems){
+                for (let server of MomoManager?.ServerItems) {
+                    if (server.ServerData.DeviceName === conServerSelectValue) {
+                        MomoServerValue = server;
+                        break;
+                    }
+                }
+            }
+
+            let MomoVideoPropsValue : UtilsMomoManager.MomoVideoProps | undefined = undefined;
+            if(MomoServerValue){
+                MomoVideoPropsValue = {
+                    Codecs : conCodecsSelectValue,
+                    VideoElement : VideoRef,
+                    MomoServerData : MomoServerValue
+                }
+            }
+
+            let VideoItem : UtilsMomoManager.MomoVideo | undefined = undefined;
+            if(MomoVideoPropsValue){
+                if(!conVideo){
+                    VideoItem = MomoManager?.addVideoItem(MomoVideoPropsValue);
+                    setVideoValue(VideoItem);
+                }
+                if(conVideo){
+                    conVideo?.connect();
+                }else{
+                    VideoItem?.connect();
+                }
+            }
+
             setIsConnection(true); //接続へ
             setBgColor(UtilsCommon.enmConnectCorlor.connect);
             setConnectButton({title:"切断",enable:true})
@@ -136,6 +180,7 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
                         sx={SelectServerSx} 
                         value={conServerSelectValue}
                         onChange={handleOnSelect_selServerList}
+                        readOnly={conServerSelectIsReadOnly}
                     >
                         {MomoServer?.map((option) => (
                             <MenuItem key={option.value} value={option.value}>

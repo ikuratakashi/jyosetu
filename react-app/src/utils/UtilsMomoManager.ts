@@ -4,12 +4,13 @@
  */
 
 import {UtilsLogger} from './UtilsLogger'
-import {EnvNetworkManager,MomoServerProps} from './UtilsCommon';
+import {DateNow} from './UtilsCommon';
+import {MomoServerProps} from './UtilsCommon';
 
 /**
  * <select>の中身用
  */
-interface MomoServerSelectList extends MomoServerProps{
+export interface MomoServerSelectList extends MomoServerProps{
     /**
      * \<select\>のvalue
      */
@@ -87,6 +88,16 @@ export class MomoManager{
     ServerItems : MomoServer[] = [];
 
     /**
+     * Momoの動画配信
+     */
+    VideoItems : MomoVideo[] = [];
+
+    /**
+     * MomoのVideoItemsのカウント
+     */
+    VideoCounter : number = 0;
+
+    /**
      * コーデック
      */
     CodecItems :{value:string,label:string} [] = [
@@ -99,7 +110,7 @@ export class MomoManager{
     /**
      * MomoServerを追加する
      * @param pProps - MomoServerの設定
-     * @returns 
+     * @returns - 追加したMomoServer
      */
     addMomoServer(pProps : MomoServerProps) : MomoServer{
         this.ServerItems.push(new MomoServer(pProps));
@@ -135,6 +146,7 @@ export class MomoManager{
      * @param pDeviceName - 選択したDeviceName
      * @param pUsed - 選択状態 (True/False)
      */
+    /*
     setUsedMomoserver(pDeviceName:string,pUsed:boolean){
         for (let server of this.ServerItems) {
             if (server.ServerData.DeviceName === pDeviceName) {
@@ -142,6 +154,92 @@ export class MomoManager{
                 break;
             }
         }
+    }
+    */
+
+
+    /**
+     * 映像情報を追加する
+     * @param props 映像を再生するエレメントやサーバ情報など
+     * @returns momoの映像情報
+     */
+    addVideoItem(props : MomoVideoProps) : MomoVideo{
+        this.VideoCounter++;
+        props.Name = `${this.VideoCounter}-${DateNow()}`;
+        this.VideoItems.push
+        (
+            new MomoVideo(props)
+        );
+        return this.VideoItems[this.VideoItems.length - 1];
+    }
+
+    /**
+     * 映像情報を削除する
+     * @param pMomoVideo - 削除するMomoVideo
+     */
+    removeVideItem(pMomoVideo:MomoVideo){
+        this.VideoItems = this.VideoItems.filter(item => item.props?.Name !== pMomoVideo.props?.Name);
+    }
+
+}
+
+
+/**
+ * Class MomoVideoのパラメタ
+ */
+export interface MomoVideoProps{
+
+    /**
+     * 識別するための名前
+     */
+    Name? : string | undefined;
+
+    /**
+     * momoのサーバ情報
+     */
+    MomoServerData : MomoServer | undefined;
+
+    /**
+     * ビデオのエレメント
+     */
+    VideoElement : React.MutableRefObject<null> | undefined;
+
+    /**
+     * コーデック
+     */
+    Codecs : string | undefined;
+}
+
+/**
+ * Momoの動画を受信して表示するクラス
+ */
+export class MomoVideo{
+
+    /**
+     * 引数
+     */
+    props : MomoVideoProps | undefined;
+
+    /**
+     * コンストラクタ
+     * @param prop プロパティ
+     */
+    constructor(pProps : MomoVideoProps){
+        this.props = pProps;
+    }
+
+    /**
+     * 接続
+     */
+    connect(){
+        console.log(`[${this.props?.Name}] connect:${JSON.stringify(this.props?.MomoServerData?.ServerData, null, 2)}`);
+    }
+
+    /**
+     * 切断
+     */
+    disconnect(){
+        console.log(`[${this.props?.Name}] disconnect:${JSON.stringify(this.props?.MomoServerData?.ServerData, null, 2)}`);
     }
 
 }

@@ -222,3 +222,25 @@ export interface MomoServerProps extends CtrlWebSocketProps{
     Codec : string;
     Used : boolean;
 }
+
+/**
+ * 
+ * @returns 現在日付
+ */
+export function DateNow() : string {
+
+    const now = new Date();
+  
+    // 各部分を取得
+    const year = now.getFullYear();
+    const month = ('0' + (now.getMonth() + 1)).slice(-2); // 月は0から始まるので+1
+    const day = ('0' + now.getDate()).slice(-2);
+    const hours = ('0' + now.getHours()).slice(-2);
+    const minutes = ('0' + now.getMinutes()).slice(-2);
+    const seconds = ('0' + now.getSeconds()).slice(-2);
+    const milliseconds = ('00' + now.getMilliseconds()).slice(-3);
+  
+    // 連結して表示
+    return `${year}-${month}-${day}_${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+}
