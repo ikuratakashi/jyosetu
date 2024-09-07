@@ -4,25 +4,7 @@
  */
 
 import {UtilsLogger} from './UtilsLogger'
-
-/**
- * WebSocketへの接続パネルのパラメタのインターフェース
- */
-export interface CtrlWebSocketProps{
-    ServerIp : string | undefined;
-    PortNo : string | undefined;
-    Protocol : string | undefined;
-}
-
-/**
- * 設定値
- */
-export interface EnvNetworkManager{
-    ws_mode : string | undefined,
-    ws_host : string | undefined,
-    ws_port : string | undefined,
-    ws_protcol : string | undefined,
-}
+import { CtrlWebSocketProps, EnvNetworkManager} from './UtilsCommon';
 
 /**
  * ネットワーク関係のマネージャー

@@ -2,8 +2,9 @@
  * @ikuratakashi
  * 共通モジュール
  */
- import { NetworkManager } from './UtilsNetworkManager';
- import { useRef } from 'react';
+import { MomoManager } from './UtilsMomoManager';
+import { NetworkManager } from './UtilsNetworkManager';
+import { useRef } from 'react';
 
 /**
  * ダッシュボードからのパラメタのインターフェース
@@ -14,6 +15,11 @@ export interface DashboardContentProps {
      * ラズパイとの通信用のwebsocket本体
      */
     networkmanager?: NetworkManager | null;
+
+    /**
+     * momoのサーバ管理マネージャ
+     */
+    momomanager?: MomoManager | null;
 
 }
 
@@ -186,4 +192,33 @@ export enum enmConnectCorlor{
      * 接続処理実行中
      */
     connecting = 'yellow',
+}
+
+
+/**
+ * WebSocketへの接続パネルのパラメタのインターフェース
+ */
+export interface CtrlWebSocketProps{
+    ServerIp : string | undefined;
+    PortNo : string | undefined;
+    Protocol : string | undefined;
+}
+
+/**
+ * 設定値
+ */
+export interface EnvNetworkManager{
+    ws_mode : string | undefined,
+    ws_host : string | undefined,
+    ws_port : string | undefined,
+    ws_protcol : string | undefined,
+}
+
+/**
+ * momoサーバへの接続パネルのパラメタのインタフェース
+ */
+export interface MomoServerProps extends CtrlWebSocketProps{
+    DeviceName : string;
+    Codec : string;
+    Used : boolean;
 }

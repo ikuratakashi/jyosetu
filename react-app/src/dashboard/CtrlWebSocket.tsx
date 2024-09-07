@@ -1,10 +1,7 @@
 import React, { useState, useEffect  } from 'react'
-import {Box, Button, Grid} from '@mui/material';
-import {CtrlWebSocketProps} from '../utils/UtilsNetworkManager'
-import { Height } from '@mui/icons-material';
+import {Button, Grid} from '@mui/material';
 import {enmConnectCorlor} from '../utils/UtilsCommon'
 import * as UtilsCommon from '../utils/UtilsCommon'
-
 
 function CtrlWebSocket(props: UtilsCommon.DashboardContentProps) {
 
@@ -60,8 +57,8 @@ function CtrlWebSocket(props: UtilsCommon.DashboardContentProps) {
 
     //useState
     const [bgColor,setBgColor] = useState(enmConnectCorlor.disconnect);
-    const [conMessage,setConnectMessage] = useState('Connect None');
     const [conButton,setConnectButton] = useState({title:'接続',enable:true});
+    const [conMessage,setConnectMessage] = useState('Connect None');
     const [conIsConnection,setIsConnection] = useState(false);
 
     if(NetWorkManager){

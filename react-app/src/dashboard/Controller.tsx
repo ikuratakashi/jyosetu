@@ -12,6 +12,7 @@ import CtrlDpad8 from './CtrlDpad8';
 import * as UtilsCommon from '../utils/UtilsCommon';
 import GameComponent from './CtrlGamePad';
 import CtrlWebSocket from './CtrlWebSocket';
+import CtrlMomoVideo from './CtrlMomoVideo';
 
 function Controller(props: UtilsCommon.DashboardContentProps) {
   
@@ -147,6 +148,7 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
       <Grid item xs sx={{ height: '100%' }}>
         <Paper sx={{ backgroundColor: 'lightcoral', height: '100%' }}>
           3列目: 残り
+          <CtrlMomoVideo {...props}/>
         </Paper>
       </Grid>
     </Grid>
