@@ -3,6 +3,16 @@ import {Box, Button, Grid} from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
 import * as UtilsCommon from '../utils/UtilsCommon'
 import * as UtilsMomoManager from '../utils/UtilsMomoManager';
+import { Margin } from '@mui/icons-material';
+
+/**
+ * 接続ステータス
+ */
+enum ConnectStatus {
+    Connect ,
+    Connecting ,
+    DisConnect
+}
 
 function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
 
@@ -10,13 +20,12 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
     const MomoManager = momomanager;
 
     const ButtonSx = {
-        fontSize: "11px",
+        fontSize: "10px",
         fontFamily: 'Courier New, monospace',
         borderRadius: 0.5,
-        height: '30px',
-        width: '40px',
+        height: '25px',
+        width: '50px',
         textAlign: 'center',
-        padding: '0px',
         minWidth: '0px',
         color:"white",
         backgroundColor:'gray',
@@ -25,25 +34,40 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
           filter: 'brightness(0.8)',
           border:'none',
         },
+        border:'0px solid black',
+        margin:'2px 1px',
     };
 
     const GridSx ={
         border:'0px solid black',
-        marginTop: '1px', // 上にスペースを追加
-        marginBottom: '1px' // 下にスペースを追加
+        marginTop: '0px', // 上にスペースを追加
+        marginBottom: '0px' // 下にスペースを追加
     }
 
     const SelectServerSx = {
-        height : '30px',
-        width : '230px',
+        height : '25px',
+        width : '165px',
+        fontSize : '10px',
+        padding: '0px',
+        minWidth: '0px',
     }
     const SelectCodecsSx = {
-        height : '30px',
-        width : '90px',
+        height : '25px',
+        width : '75px',
+        fontSize : '10px',
+        padding: '0px',
+        minWidth: '0px',
     }
 
-    const VideoSx = {
-        maxWidth:'300px'
+    const VideoStyle = {
+        width:'100%',
+        maxWidth:'414px'
+    }
+
+    const ConnectBox = {
+        marginTop:'2px',
+        height:'25px',
+        width:'30px',
     }
 
     //映像配信サーバmomoのリスト内容
@@ -74,7 +98,7 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
     const [bgColor,setBgColor] = useState(UtilsCommon.enmConnectCorlor.disconnect);
     const [conButton,setConnectButton] = useState({title:'接続',enable:true});
     const [conMessage,setConnectMessage] = useState('Connect None');
-    const [conIsConnection,setIsConnection] = useState(false);
+    const [conIsConnection,setIsConnection] = useState<ConnectStatus>(ConnectStatus.DisConnect);
     const [conServerSelectIsReadOnly,setServerSelectIsReadOnly] = useState(false);
     const [conServerSelectValue,setServerSelectValue] = useState('none');
     const [conCodecsSelectValue,setCodecsSelectValue] = useState('H264');
@@ -82,29 +106,39 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
 
     //各オブジェクトを操作するときの変数を定義
     //※各コントロールのrefに設定することで変数を経由して操作できる
-    const VideoRef = useRef(null);
+    const VideoRef = useRef<HTMLVideoElement>(null);
     const CodecsRef = useRef(null);
     const ServerRef = useRef(null);
 
+    useEffect(() => {
+        const videoElement = VideoRef.current;
+    }, []);    
+
     //接続ボタンのクリック時の処理
     const handleOnClick_btnConnection = (event:any) =>{
-        if(conIsConnection == true){
 
+        if(conIsConnection == ConnectStatus.Connect || conIsConnection == ConnectStatus.Connecting){
             //接続時 → 切断へ
-
+            //接続中 → 切断へ
             if(conVideo){
                 conVideo?.disconnect();
                 MomoManager?.removeVideItem(conVideo);
                 setVideoValue(undefined);
             }
 
-            setIsConnection(false);
+            setIsConnection(ConnectStatus.DisConnect);
             setBgColor(UtilsCommon.enmConnectCorlor.disconnect);
             setConnectButton({title:"接続",enable:true})
             setServerSelectIsReadOnly(false);
 
-        }else{
-            //切断時 → 接続へ
+        }else if(conIsConnection == ConnectStatus.DisConnect){
+            //切断時 → 接続中 → カメラと接続出来たら → 接続へ
+            //　　　   　　　 → カメラと接続出来なかったら → 切断へ
+
+            setIsConnection(ConnectStatus.Connecting); //接続中へ
+            setBgColor(UtilsCommon.enmConnectCorlor.connecting);
+            setConnectButton({title:"接続中.",enable:true})
+            setServerSelectIsReadOnly(true);
 
             let MomoServerValue : UtilsMomoManager.MomoServer | undefined = undefined;
             if(MomoManager?.ServerItems){
@@ -120,28 +154,55 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
             if(MomoServerValue){
                 MomoVideoPropsValue = {
                     Codecs : conCodecsSelectValue,
-                    VideoElement : VideoRef,
+                    VideoElement : VideoRef.current,
                     MomoServerData : MomoServerValue
                 }
             }
 
-            let VideoItem : UtilsMomoManager.MomoVideo | undefined = undefined;
-            if(MomoVideoPropsValue){
-                if(!conVideo){
-                    VideoItem = MomoManager?.addVideoItem(MomoVideoPropsValue);
-                    setVideoValue(VideoItem);
-                }
-                if(conVideo){
-                    conVideo?.connect();
-                }else{
-                    VideoItem?.connect();
-                }
+            let ConnectOK = () =>{
+                setIsConnection(ConnectStatus.Connect); //接続へ
+                setBgColor(UtilsCommon.enmConnectCorlor.connect);
+                setConnectButton({title:"切断",enable:true})
+                setServerSelectIsReadOnly(true);
             }
 
-            setIsConnection(true); //接続へ
-            setBgColor(UtilsCommon.enmConnectCorlor.connect);
-            setConnectButton({title:"切断",enable:true})
-            setServerSelectIsReadOnly(true);
+            let ConnectNG = () =>{
+                setIsConnection(ConnectStatus.DisConnect); //接続解除へ
+                setBgColor(UtilsCommon.enmConnectCorlor.disconnect);
+                setConnectButton({title:"接続",enable:true})
+                setServerSelectIsReadOnly(false);
+            }
+
+            let MomoVideoItem : UtilsMomoManager.MomoVideo | undefined = undefined;
+            if(MomoVideoPropsValue){
+
+                if(!conVideo){
+                    MomoVideoItem = MomoManager?.addVideoItem(MomoVideoPropsValue);
+                    setVideoValue(MomoVideoItem);
+                }else{
+                    MomoVideoItem = conVideo;
+                }
+
+                if(MomoVideoItem){
+                    MomoVideoItem.WsOpenEx = () =>{
+                        MomoVideoItem?.connect();
+                        ConnectOK();
+                    }
+                    MomoVideoItem.WsErrorEx = () =>{
+                        ConnectNG();
+                    }
+
+                    //**************************************** */
+                    // WebSocketの実行と接続
+                    //**************************************** */
+                    MomoVideoItem.SetWebSocket();
+
+                }else{
+                    ConnectNG();
+                }
+            }else{
+                ConnectNG();
+            }
         }
     }
 
@@ -190,13 +251,13 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
                     </Select>
                 </Grid>
                 <Grid item sx={GridSx}>
-                    <Button id="btnConnect" onClick={handleOnClick_btnConnection} sx={{...ButtonSx,margin:"0px 2px"}} disabled={!conButton.enable} >{conButton.title}</Button>
+                    <Button onClick={handleOnClick_btnConnection} sx={ButtonSx} disabled={!conButton.enable} >{conButton.title}</Button>
                 </Grid>
-                <Grid item id="grdConnectColor" sx={{...GridSx,backgroundColor:bgColor,width:'30px'}}></Grid>
+                <Grid item sx={{...GridSx,...ConnectBox,backgroundColor:bgColor}}></Grid>
             </Grid>
             {/* カメラ部分*/}
             <Grid container sx={{...GridSx, width:"100%"}}>
-                <video ref={VideoRef} style={{width:"100%",maxWidth:"400px"}} controls>
+                <video ref={VideoRef} style={VideoStyle} controls>
                 Your browser does not support the video tag.
                 </video>
             </Grid>

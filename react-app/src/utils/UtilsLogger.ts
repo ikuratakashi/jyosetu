@@ -7,9 +7,30 @@ export class UtilsLogger{
     /**
      * ログを出力する
      * @param pMessage 出力するログのメッセージ
+     * ```js
+     * this.Logger.Log(`${this.Logger.getMethodName()}():data:${event.data}`);
+     * ```
      */
-    Log(pMessage:string){
-        console.log(pMessage);
+    Log(pMessage:string,pValue?:any){
+        if(pValue){
+            console.log(pMessage,pValue);
+        }else{
+            console.log(pMessage);
+        }
+    }
+
+    /**
+     * コンソールのグループ開始
+     */
+    ConsoleGroupSet(){
+        console.group();
+    }
+    
+    /**
+     * コンソールのグループ終了
+     */
+    consoleGroupEnd(){
+        console.groupEnd();
     }
 
     /**

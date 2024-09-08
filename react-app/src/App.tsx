@@ -26,7 +26,7 @@ const App = () => {//
       Codec : "H264",
       PortNo : "51001",
       Protocol : "ws",
-      ServerIp : "192.168.1.1",
+      ServerIp : "192.168.3.14",
       Used : false,
     })
     MomoManager.addMomoServer({
@@ -34,7 +34,7 @@ const App = () => {//
       Codec : "H264",
       PortNo : "51002",
       Protocol : "ws",
-      ServerIp : "192.168.1.1",
+      ServerIp : "192.168.3.14",
       Used : false,
     })
     MomoManager.addMomoServer({
@@ -42,7 +42,23 @@ const App = () => {//
       Codec : "H264",
       PortNo : "51003",
       Protocol : "ws",
-      ServerIp : "192.168.1.1",
+      ServerIp : "192.168.3.14",
+      Used : false,
+    })
+    MomoManager.addMomoServer({
+      DeviceName : "server4",
+      Codec : "H264",
+      PortNo : "51004",
+      Protocol : "ws",
+      ServerIp : "192.168.3.14",
+      Used : false,
+    })
+    MomoManager.addMomoServer({
+      DeviceName : "server5",
+      Codec : "H264",
+      PortNo : "51005",
+      Protocol : "ws",
+      ServerIp : "192.168.3.14",
       Used : false,
     })
   }

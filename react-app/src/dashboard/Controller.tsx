@@ -13,9 +13,24 @@ import * as UtilsCommon from '../utils/UtilsCommon';
 import GameComponent from './CtrlGamePad';
 import CtrlWebSocket from './CtrlWebSocket';
 import CtrlMomoVideo from './CtrlMomoVideo';
+import { styled } from '@mui/material/styles';
 
 function Controller(props: UtilsCommon.DashboardContentProps) {
   
+  const GridSx ={
+    border:'1px solid black',
+    width:'100px'
+    //marginTop: '1px', // 上にスペースを追加
+    //marginBottom: '1px' // 下にスペースを追加
+  }
+
+  const Item = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+    height: '230px',
+  }));
+
   return (
     <Grid container spacing={1} sx={{ height: '100%' }}>
       <Grid item style={{ width: '550px', height: '100%' }}>
@@ -147,8 +162,32 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
       </Grid>
       <Grid item xs sx={{ height: '100%' }}>
         <Paper sx={{ backgroundColor: 'lightcoral', height: '100%' }}>
-          3列目: 残り
-          <CtrlMomoVideo {...props}/>
+
+          <Grid container spacing={0}>
+            <Grid item xs={4}></Grid>
+            <Grid item xs={4}>
+              <Grid item>
+                <CtrlMomoVideo {...props}/>
+              </Grid>
+              <Grid item>
+                <CtrlMomoVideo {...props}/>
+              </Grid>
+            </Grid>
+            <Grid item xs={4}></Grid>
+            <Grid item xs={4}>
+              <CtrlMomoVideo {...props}/>
+            </Grid>
+            <Grid item xs={4}></Grid>
+            <Grid item xs={4}>
+              <CtrlMomoVideo {...props}/>
+            </Grid>
+            <Grid item xs={4}></Grid>
+            <Grid item xs={4}>
+              <CtrlMomoVideo {...props}/>
+            </Grid>
+            <Grid item xs={4}></Grid>
+          </Grid>
+          
         </Paper>
       </Grid>
     </Grid>
