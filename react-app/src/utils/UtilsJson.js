@@ -16,6 +16,7 @@ export function CleateJsonActionToStr(button, value) {
             "action":
             [
                 { 
+                    "type":"OPERATION",
                     "button":button, 
                     "value":value,
                     "time":`${year}/${month}/${day} ${hours}:${minutes}:${seconds}:${milliseconds}`
