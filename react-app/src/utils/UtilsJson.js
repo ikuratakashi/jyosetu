@@ -1,5 +1,5 @@
 // utils/convertToJson.js
-export function CleateJsonActionToStr(button, value) {
+export function CleateJsonActionToStr(type, button, value) {
 
     // 現在時刻を取得
     const now = new Date();
@@ -16,7 +16,7 @@ export function CleateJsonActionToStr(button, value) {
             "action":
             [
                 { 
-                    "type":"OPERATION",
+                    "type":type,
                     "button":button, 
                     "value":value,
                     "time":`${year}/${month}/${day} ${hours}:${minutes}:${seconds}:${milliseconds}`

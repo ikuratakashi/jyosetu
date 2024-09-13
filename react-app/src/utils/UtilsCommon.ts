@@ -7,23 +7,6 @@ import { NetworkManager } from './UtilsNetworkManager';
 import { useRef } from 'react';
 
 /**
- * ダッシュボードからのパラメタのインターフェース
- */
-export interface DashboardContentProps {
-
-    /**
-     * ラズパイとの通信用のwebsocket本体
-     */
-    networkmanager?: NetworkManager | null;
-
-    /**
-     * momoのサーバ管理マネージャ
-     */
-    momomanager?: MomoManager | null;
-
-}
-
-/**
  * アナログスティックの種類
  */
 export enum enmAnalogSticType{
@@ -205,13 +188,23 @@ export interface CtrlWebSocketProps{
 }
 
 /**
- * 設定値
+ * 設定値 - ネットワーク関連
  */
 export interface EnvNetworkManager{
     ws_mode : string | undefined,
     ws_host : string | undefined,
     ws_port : string | undefined,
     ws_protcol : string | undefined,
+}
+
+
+/**
+ * 設定値 - コマンド関連
+ */
+export interface EnvSendCommand{
+    type_emergency : string | undefined,
+    type_operation : string | undefined,
+    type_sound : string | undefined,
 }
 
 /**
@@ -242,5 +235,27 @@ export function DateNow() : string {
   
     // 連結して表示
     return `${year}-${month}-${day}_${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+}
+
+/**
+ * ダッシュボードからのパラメタのインターフェース
+ */
+export interface DashboardContentProps {
+
+    /**
+     * ラズパイとの通信用のwebsocket本体
+     */
+    networkmanager?: NetworkManager | null;
+
+    /**
+     * momoのサーバ管理マネージャ
+     */
+    momomanager?: MomoManager | null;
+
+    /**
+     * コマンドを送信するパラメタ関連
+     */
+    envsendcommand?: EnvSendCommand | null
 
 }

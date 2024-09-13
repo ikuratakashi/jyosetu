@@ -67,6 +67,7 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
     const {networkmanager}: { networkmanager: UtilsNetworkManager.NetworkManager} = props;
     const NetworkManager = networkmanager;
     const [intervalId, setIntervalId] = useState<number | null>(null);;
+    const {envsendcommand}: { envsendcommand: UtilsCommon.EnvSendCommand} = props;
 
     /**
      * タイマーの起動
@@ -77,7 +78,7 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
                     (
                         () => {
                             if (NetworkManager){
-                                NetworkManager.sendWsMessage(CleateJsonActionToStr(ButtonType,1));
+                                NetworkManager.sendWsMessage(CleateJsonActionToStr(envsendcommand.type_operation,ButtonType,1));
                             } 
                         }
                         , IntervalMs
@@ -92,7 +93,7 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
      */
     const onMouseClick = () =>{
         if (NetworkManager){
-            NetworkManager.sendWsMessage(CleateJsonActionToStr(ButtonType,1));
+            NetworkManager.sendWsMessage(CleateJsonActionToStr(envsendcommand.type_operation,ButtonType,1));
         } 
         //sendMessage(CleateJsonActionToStr(ButtonType,1));
     }

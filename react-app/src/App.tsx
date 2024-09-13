@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import DashboardContent from './dashboard/Dashboard';
-import {EnvNetworkManager,MomoServerProps} from './utils/UtilsCommon';
+import {EnvNetworkManager,EnvSendCommand,MomoServerProps} from './utils/UtilsCommon';
 import * as UtilsNetworkManager from './utils/UtilsNetworkManager';
 import * as UtilsMomoManager from './utils/UtilsMomoManager';
 
@@ -8,15 +8,24 @@ import * as UtilsMomoManager from './utils/UtilsMomoManager';
 const App = () => {//
 
   //.envファイルの読み込み
-  const ws_env :EnvNetworkManager = {
+
+  //ネットワーク関連
+  const env_ws :EnvNetworkManager = {
     ws_mode : process.env.REACT_APP_WEBSOCKET_MODE,
     ws_host : process.env.REACT_APP_WEBSOCKET_HOST,
     ws_port : process.env.REACT_APP_WEBSOCKET_PORT,
     ws_protcol : process.env.REACT_APP_WEBSOCKET_PROTOCOL,
   }
+
+  //ボタンを押下した時のコマンド関連
+  const env_send_command :EnvSendCommand = {
+    type_emergency : process.env.REACT_APP_TYPE_EMERGENCY,
+    type_operation : process.env.REACT_APP_TYPE_OPERATION,
+    type_sound : process.env.REACT_APP_TYPE_SOUND,
+  }
   
   //通信関係のモジュール
-  const NetWorkManager = new UtilsNetworkManager.NetworkManager(ws_env);
+  const NetWorkManager = new UtilsNetworkManager.NetworkManager(env_ws);
 
   //カメラ関係のモジュール
   const MomoManager = new UtilsMomoManager.MomoManager();
@@ -66,7 +75,8 @@ const App = () => {//
   //ダッシュボードの画面表示
   const props ={
     networkmanager:NetWorkManager,
-    momomanager:MomoManager
+    momomanager:MomoManager,
+    envsendcommand:env_send_command,
   };
   return <DashboardContent {...props} />;
 

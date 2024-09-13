@@ -152,7 +152,7 @@ class clsDB:
                     CurJyosetu = ConJyosetu.cursor()
 
                     #テーブル作成SQL
-                    CurJyosetu.execute(f'''
+                    sql = f'''
                     INSERT INTO {self.EnvData.DB_TBL_COMMAND} 
                     (
                     Type ,
@@ -166,10 +166,11 @@ class clsDB:
                     '{action['type']}',
                     '{action['button']}',
                     {action['value']},
-                    '{action['time']}'
+                    '{action['time']}',
                     '{now_time}'
                     )
-                    ''')
+                    '''
+                    CurJyosetu.execute(sql)
                     
                     ConJyosetu.commit()
 
@@ -179,10 +180,6 @@ class clsDB:
                     if ConJyosetu:
                         CurJyosetu.close()
 
-
-
-JyosetuDB = clsDB()
-
 def Init():
     '''
     初期化処理
@@ -191,11 +188,12 @@ def Init():
     #環境設定の読み込み(.envファイル)
     EnvData = clsEnvData()
 
-    #DBの作成
-    JyosetuDB = clsDB()
+async def handler(websocket, path):
+    
+    #DB変数の定義
+    JyosetuDB : clsDB = clsDB() 
     JyosetuDB.CreateDb()
 
-async def handler(websocket, path):
     '''
     WebSocketの処理
     '''
@@ -232,6 +230,7 @@ async def main():
     await start_server.wait_closed()
 
 if __name__ == "__main__":
+
     Init()
     Openning()
     asyncio.run(main())
