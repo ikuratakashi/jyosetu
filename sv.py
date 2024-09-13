@@ -13,6 +13,10 @@ from dotenv import load_dotenv  # type: ignore
 import sqlite3
 import json
 
+import time
+from watchdog.observers import Observer # type: ignore
+from watchdog.events import FileSystemEventHandler # type: ignore
+
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
 
@@ -39,7 +43,8 @@ class clsEnvData:
 
     VERSION : str = ""
     DB_JYOSETU : str = ""
-    DB_TBL_DB_TBL_COMMAND : str = ""
+    DB_JYOSETU_MODE : str = ""
+    DB_TBL_COMMAND : str = ""
     TYPE_EMERGENCY : str = ""
     TYPE_OPERATION : str = ""
     TYPE_SOUND : str = ""
@@ -55,7 +60,11 @@ class clsEnvData:
         now_time = now.strftime('%Y%m%d%H%M%S%f')[:-3]
 
         self.VERSION = os.getenv('VERSION')
-        self.DB_JYOSETU = (f"{os.getenv('DB_JYOSETU')}_{now_time}.db")
+        self.DB_JYOSETU_MODE = os.getenv('DB_JYOSETU_MODE')
+        if self.DB_JYOSETU_MODE == "ONE":
+            self.DB_JYOSETU = f"{os.getenv('DB_JYOSETU')}.db"
+        else:
+            self.DB_JYOSETU = f"{os.getenv('DB_JYOSETU')}_{now_time}.db"
         self.DB_TBL_COMMAND = os.getenv('DB_TBL_COMMAND')
 
         self.TYPE_EMERGENCY = os.getenv('TYPE_EMERGENCY')
@@ -188,49 +197,194 @@ def Init():
     #環境設定の読み込み(.envファイル)
     EnvData = clsEnvData()
 
-async def handler(websocket, path):
+class clsSendCommandFromDB(FileSystemEventHandler):
+    '''
+    DBに保存されたコマンドを送信する
+    '''
+
+    '''
+    除雪のWebSocketクラス
+    '''
+    JyosetuDB : clsDB
+
+    '''
+    DBファイル更新の監視
+    '''
+    DbObserver : any
+
+    def __init__(self,pDb:clsDB):
+        '''
+        コンストラクタ
+        '''
+        super().__init__()
+        self.JyosetuDB = pDb    
+
+    def Start(self):
+        '''
+        処理開始
+        '''
+        self.DbObserver = Observer()
+        self.DbObserver.schedule(self,path='.',recursive=False)
+        self.DbObserver.start()
+
+    def Stop(self):
+        '''
+        処理の停止
+        '''
+        self.DbObserver.stop()
+        self.DbObserver.join()
+
+    def on_modified(self,event):
+        '''
+        ファイルの変更イベント
+        '''
+        if os.path.basename(event.src_path) == self.JyosetuDB.EnvData.DB_JYOSETU:
+            self.DbReadSendCommand()
     
-    #DB変数の定義
-    JyosetuDB : clsDB = clsDB() 
-    JyosetuDB.CreateDb()
+    def on_created(self, event):
+        '''
+        ファイルの作成イベント
+        '''
+        if os.path.basename(event.src_path) == self.JyosetuDB.EnvData.DB_JYOSETU:
+            self.DbReadSendCommand()
 
+    def SendCommand(self,pCommand):
+        '''
+        実際のコマンドの送信
+        '''
+        print(f"Send Command: {pCommand}")
+
+    def DbReadSendCommand(self):
+        '''
+        DBを読み込み、コマンドの送信を実行する
+        '''
+        env = self.JyosetuDB.EnvData
+
+        try:
+            errstep = "コマンドのレコードを取得"
+            conn = sqlite3.connect(env.DB_JYOSETU)
+            conn.row_factory = sqlite3.Row 
+            cursor = conn.cursor()
+
+            sql = f'''
+            Select * From {env.DB_TBL_COMMAND} 
+            Where ExecFlag IS NULL
+            Order by SUBSTR(Type,1,6),SendTime
+            '''
+
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+
+            Commands = []
+
+            #コマンドの送信
+            for row in rows:
+
+                Commands.append({
+                    "Key" : row["ID"],
+                    "Type" : row["Type"],
+                    "Command" : row["Command"]
+                })
+
+                #送信
+                errstep = "コマンドを送信"
+                self.SendCommand(Commands[len(Commands)-1])
+                
+
+            #送信したコマンドを送信完了にする
+            errstep = "コマンドを送信完了にする"
+            for Command in Commands:
+
+                now = datetime.now()
+                now_time = now.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
+
+                sql = f'''
+                Update 
+                    {env.DB_TBL_COMMAND}
+                Set
+                    ExecFlag = ?,
+                    ExecDate = ?
+                Where
+                    ID = ?
+                '''
+                cursor.execute(sql,(1,now_time,Command["Key"]))
+                conn.commit()
+
+        except sqlite3.Error as e:
+            print(f"SendCommand():ErrorStep:{errstep}:{e}")
+        finally:
+            if conn:
+                conn.close()
+
+class clsWebSocketJyosetu:
     '''
-    WebSocketの処理
+    除雪のWebSocketサーバー
     '''
-    try:
-        async for message in websocket:
 
-            if platform.system() == "Windows":
-                os.system("cls")
-            else:
-                os.system("clear")
+    #除雪のDB
+    JyosetuDB : clsDB
 
-            print(f"Received message: {message}")
+    #コマンドの送信
+    SendCommand : clsSendCommandFromDB
 
-            jsonMsg = json.loads(message)
-            JyosetuDB.InsertCommand(jsonMsg)
+    def __init__(self):
+        '''
+        コンストラクタ
+        '''
+        self.EnvData = clsEnvData()
 
-            #await websocket.send(f"Echo: {message}")
-    except websockets.exceptions.ConnectionClosedError as e:
-        print(f"Connection closed: {e}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
+    async def Start(self):
+        '''
+        サーバの開始
+        '''
 
-async def main():
-    '''
-    メイン処理
-    '''
-    start_server = await websockets.serve(handler, host, port)
+        #DBの作成
+        self.JyosetuDB = clsDB() 
+        self.JyosetuDB.CreateDb()
 
-    # ホスト名とIPアドレスの取得
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-    print(f"WebSocket server is running on ws://{ip_address}:{port} or ws://{hostname}:{port}")
+        #コマンドの送信オブジェクト設定
+        self.SendCommand = clsSendCommandFromDB(self.JyosetuDB)
+        self.SendCommand.Start()
 
-    await start_server.wait_closed()
+        #WebSocketサーバの開始
+        start_server = await websockets.serve(self.WebSocketHandler, host, port)
 
+        # ホスト名とIPアドレスの取得
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        print(f"WebSocket server is running on ws://{ip_address}:{port} or ws://{hostname}:{port}")
+
+        await start_server.wait_closed()
+
+    async def WebSocketHandler(self,websocket, path):
+        
+        '''
+        WebSocketの処理
+        '''
+        try:
+            async for message in websocket:
+
+                if platform.system() == "Windows":
+                    os.system("cls")
+                else:
+                    os.system("clear")
+
+                print(f"Received message: {message}")
+
+                jsonMsg = json.loads(message)
+                self.JyosetuDB.InsertCommand(jsonMsg)
+
+                #await websocket.send(f"Echo: {message}")
+        except websockets.exceptions.ConnectionClosedError as e:
+            print(f"Connection closed: {e}")
+            self.SendCommand.Stop()
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            self.SendCommand.Stop()
+    
 if __name__ == "__main__":
 
+    WebSocketJyosetu : clsWebSocketJyosetu = clsWebSocketJyosetu()
     Init()
     Openning()
-    asyncio.run(main())
+    asyncio.run(WebSocketJyosetu.Start())
