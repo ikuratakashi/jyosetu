@@ -19,9 +19,36 @@ from watchdog.events import FileSystemEventHandler # type: ignore
 import threading
 from typing import List
 import signal
+import inspect
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
+class clsLog:
+    '''
+    ログ出力
+    '''
+    def LogOut(self,pMessage):
+        '''
+        出力
+        '''
+        print(pMessage)
+
+class clsError:
+    '''
+    エラー処理
+    '''
+
+    Log : clsLog = clsLog()
+    '''
+    ログ
+    '''
+
+    def HandleError(self,pCur,pE):
+        '''
+        エラー処理
+        '''
+        self.Log.LogOut(f"{pCur}:error:{pE}")
+
 
 def Openning():
     '''
@@ -76,7 +103,7 @@ class clsEnvData:
         self.TYPE_SOUND = os.getenv('TYPE_SOUND')
         self.TYPE_AUTO = os.getenv('TYPE_AUTO')
 
-class clsDB:
+class clsDB(clsLog,clsError):
 
     EnvData : clsEnvData
     '''
@@ -99,12 +126,6 @@ class clsDB:
         '''
         self.EnvData = clsEnvData()
 
-    def HandleError(self,pE):
-        '''
-        エラー処理
-        '''
-        print(f"{pE}")
-
     def IsCommandType(self,pMessage) -> bool:
         '''
         メッセージがコマンドかどうか
@@ -125,9 +146,13 @@ class clsDB:
         '''
         DBの作成
         '''
+        cur = inspect.currentframe().f_code.co_name
         try:
+            self.DbOpen()
+
             CurJyosetu = self.ConJyosetu.cursor()
-            
+            CurJyosetu.execute('BEGIN TRANSACTION')
+
             #テーブル作成SQL
             CurJyosetu.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.EnvData.DB_TBL_COMMAND} 
@@ -144,35 +169,51 @@ class clsDB:
             self.ConJyosetu.commit()
 
         except sqlite3.Error as e:
-            self.HandleError(e)
+            self.HandleError(cur,e)
+            self.DbRollBack()
+        finally:
+            self.DbClose()
 
     def DbOpen(self):
         '''
         DBをオープンする
         '''
+        cur = inspect.currentframe().f_code.co_name
         try:
             if self.IsJyosetuDbOpen == False:
                 self.ConJyosetu = sqlite3.connect(self.EnvData.DB_JYOSETU,check_same_thread=False)
                 self.IsJyosetuDbOpen = True
         except sqlite3.Error as e :
-            self.HandleError(e)
+            self.HandleError(cur,e)
             self.IsJyosetuDbOpen = False
 
     def DbClose(self):
         '''
         DBをクローズする
         '''
+        cur = inspect.currentframe().f_code.co_name
         try:
             if self.ConJyosetu != None and self.IsJyosetuDbOpen == True:
                 self.ConJyosetu.close()
                 self.IsJyosetuDbOpen = False
         except sqlite3.Error as e :
-            self.HandleError(e)
+            self.HandleError(cur,e)
+
+    def DbRollBack(self):
+        '''
+        DBのロールバック
+        '''
+        cur = inspect.currentframe().f_code.co_name
+        try:
+            self.ConJyosetu.rollback()
+        except sqlite3.Error as e :
+            self.HandleError(cur,e)
 
     def InsertCommand(self,pMessage):
         '''
         コマンドを追加する
         '''
+        cur = inspect.currentframe().f_code.co_name
 
         '''
         送信されてくるjsonの形式は、
@@ -183,40 +224,55 @@ class clsDB:
         '''
 
         #コマンドのタイプ
-        for action in pMessage['action']:
+        try:
 
-            if self.IsCommandType(action) == True:
+            DB : clsDB = clsDB()
+            DB.DbOpen()
 
-                now = datetime.now()
-                now_time = now.strftime('%Y-%m-%d %H:%M:%S%f')[:-3]
+            CurJyosetu = DB.ConJyosetu.cursor()
+            CurJyosetu.execute('BEGIN TRANSACTION')
 
-                try:
-                    CurJyosetu = self.ConJyosetu.cursor()
+            for action in pMessage['action']:
 
-                    #テーブル作成SQL
-                    sql = f'''
-                    INSERT INTO {self.EnvData.DB_TBL_COMMAND} 
-                    (
-                    Type ,
-                    Command ,
-                    Quantity ,
-                    SendTime,
-                    RecTime
-                    )
-                    VALUES
-                    (
-                    '{action['type']}',
-                    '{action['button']}',
-                    {action['value']},
-                    '{action['time']}',
-                    '{now_time}'
-                    )
-                    '''
-                    CurJyosetu.execute(sql)
-                    self.ConJyosetu.commit()
+                if self.IsCommandType(action) == True:
 
-                except sqlite3.Error as e:
-                    self.HandleError(e)
+                    now = datetime.now()
+                    now_time = now.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
+
+                    try:
+
+
+                        #テーブル作成SQL
+                        sql = f'''
+                        INSERT INTO {self.EnvData.DB_TBL_COMMAND} 
+                        (
+                        Type ,
+                        Command ,
+                        Quantity ,
+                        SendTime,
+                        RecTime
+                        )
+                        VALUES
+                        (
+                        '{action['type']}',
+                        '{action['button']}',
+                        {action['value']},
+                        '{action['time']}',
+                        '{now_time}'
+                        )
+                        '''
+                        CurJyosetu.execute(sql)
+
+                    except sqlite3.Error as e:
+                        self.HandleError(cur,e)
+
+            DB.ConJyosetu.commit()
+
+        except sqlite3.Error as e:
+            self.HandleError(cur,e)
+            DB.DbRollBack()
+        finally:
+            DB.DbClose()
 
 def Init():
     '''
@@ -249,7 +305,7 @@ class enmAutoClutchActionType(Enum):
     STOP = 0
     START = 1
 
-class clsSendCommandFromDB(FileSystemEventHandler):
+class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     '''
     DBに保存されたコマンドを送信する
     '''
@@ -304,12 +360,17 @@ class clsSendCommandFromDB(FileSystemEventHandler):
     クラッチダウンを長押し中
     '''
 
+    IsDbUpdate : bool = False
+    '''
+    DBの更新中
+    '''
+
     def __init__(self,pDb:clsDB):
         '''
         コンストラクタ
         '''
         super().__init__()
-        self.JyosetuDB = pDb    
+        self.JyosetuDB = pDb
 
     def Start(self):
         '''
@@ -344,27 +405,39 @@ class clsSendCommandFromDB(FileSystemEventHandler):
         ファイルの変更イベント
         '''
         if os.path.basename(event.src_path) == self.JyosetuDB.EnvData.DB_JYOSETU:
-            #コマンド送信
-            Commands : List[clsSendCommandData] = self.DbReadSendCommand()
-            #自動クラッチアップの実行を判定
-            self.AutoClutchShouldStartStop(Commands)
-            #コマンドを送信した日時を保存
-            if len(Commands) > 0 :
-                self.BefCommandSendTime = datetime.now()
+            #コマンドの送信
+            if self.IsDbUpdate == False:
+                self.CommandSendDaemon()
 
     def on_created(self, event):
         '''
         ファイルの作成イベント
         '''
         if os.path.basename(event.src_path) == self.JyosetuDB.EnvData.DB_JYOSETU:
-            #コマンド送信
-            Commands : List[clsSendCommandData] = self.DbReadSendCommand()
-            #自動クラッチアップの実行を判定
-            self.AutoClutchShouldStartStop(Commands)
-            #コマンドを送信した日時を保存
-            if len(Commands) > 0 :
-                self.BefCommandSendTime = datetime.now()
+            #コマンドの送信
+            if self.IsDbUpdate == False:
+                self.CommandSendDaemon()
+
+    def CommandSendDaemon(self):
+        '''
+        コマンド送信のデーモン起動
+        '''
+        thread = threading.Thread(target=self.CommandSend)
+        thread.daemon = True
+        thread.start()
     
+    def CommandSend(self):
+        '''
+        コマンドの送信
+        '''
+        #コマンド送信
+        Commands : List[clsSendCommandData] = self.DbReadSendCommand()
+        #自動クラッチアップの実行を判定
+        self.AutoClutchShouldStartStop(Commands)
+        #コマンドを送信した日時を保存
+        if len(Commands) > 0 :
+            self.BefCommandSendTime = datetime.now()
+
     def AutoClutchShouldStartStop(self,pCommands:List[clsSendCommandData]):
         '''
         自動クラッチアップの実行を判定
@@ -442,13 +515,24 @@ class clsSendCommandFromDB(FileSystemEventHandler):
         戻り値：
             Commans -> List[clsSendCommandData] : 送信したコマンド
         '''
+
+        cur = inspect.currentframe().f_code.co_name
         env = self.JyosetuDB.EnvData
         Commands:List[clsSendCommandData] = []
+
+        if self.IsDbUpdate == True:
+            return Commands
+        
+        self.IsDbUpdate = True
+
+        DB : clsDB = clsDB()
 
         try:
             errstep = "コマンドのレコードを取得"
 
-            conn : sqlite3.Connection = self.JyosetuDB.ConJyosetu
+            DB.DbOpen()
+
+            conn : sqlite3.Connection = DB.ConJyosetu
             conn.row_factory = sqlite3.Row 
             cursor = conn.cursor()
 
@@ -462,25 +546,20 @@ class clsSendCommandFromDB(FileSystemEventHandler):
             rows = cursor.fetchall()
 
             #コマンドの送信
+            cursor.execute('BEGIN TRANSACTION')
             for row in rows:
 
-                Commands.append(
-                    clsSendCommandData(
-                        pKey = row["ID"],
-                        pType = row["Type"],
-                        pCommand = row["Command"]
-                    )
-                )
-
-                #送信
-                errstep = "コマンドを送信"
-                self.SendCommand(Commands[len(Commands)-1])
-            
-            #送信したコマンドを送信完了にする
-            errstep = "コマンドを送信完了にする"
-            for Command in Commands:
-
+                #送信コマンドの更新
+                errstep = "コマンドを送信完了にする"
                 now = datetime.now()
+                RecTime = now
+                try:
+                    RecTime = datetime.strptime(row["RecTime"], "%Y-%m-%d %H:%M:%S:%f")
+                    sec = (now - RecTime).total_seconds()
+                    print(f"now({now}) - RecTime({RecTime}) = {sec}")
+                except:
+                    pass
+
                 now_time = now.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
 
                 sql = f'''
@@ -492,11 +571,53 @@ class clsSendCommandFromDB(FileSystemEventHandler):
                 Where
                     ID = ?
                 '''
-                cursor.execute(sql,(1,now_time,Command.Key))
+
+                cursor.execute('PRAGMA busy_timeout = 5000')
+                cursor.execute(sql,(1,now_time,row["ID"]))
+
+                Commands.append(
+                    clsSendCommandData(
+                        pKey = row["ID"],
+                        pType = row["Type"],
+                        pCommand = row["Command"]
+                    )
+                )
+
+            conn.commit()
+
+            #送信
+            errstep = "コマンドを送信"
+            for Command in Commands:
+                self.SendCommand(Command)
+            
+            #送信したコマンドを送信完了にする
+            if False:
+                errstep = "コマンドを送信完了にする"
+                for Command in Commands:
+
+                    now = datetime.now()
+                    now_time = now.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
+
+                    sql = f'''
+                    Update 
+                        {env.DB_TBL_COMMAND}
+                    Set
+                        ExecFlag = ?,
+                        ExecDate = ?
+                    Where
+                        ID = ?
+                    '''
+                    cursor.execute(sql,(1,now_time,Command.Key))
                 conn.commit()
 
+
         except sqlite3.Error as e:
-            print(f"SendCommand():ErrorStep:{errstep}:{e}")
+            self.HandleError(cur,f"{errstep}:{e}")
+            DB.DbRollBack()
+        finally:
+            DB.DbClose()
+
+        self.IsDbUpdate = False
 
         return Commands
 
@@ -533,19 +654,25 @@ class clsSendCommandFromDB(FileSystemEventHandler):
             self.SendCommand(SendCommand)
             #time.sleep(0.25)
     
-class clsWebSocketJyosetu:
+class clsWebSocketJyosetu(clsLog,clsError):
     '''
     除雪のWebSocketサーバー
     '''
 
     JyosetuDB : clsDB
-    #除雪のDB
+    '''
+    除雪のDB
+    '''
 
     SendCommand : clsSendCommandFromDB
-    #コマンドの送信
+    '''
+    コマンドの送信
+    '''
 
     WebSocketServer : websockets.serve
-    #WebSocketsサーバー
+    '''
+    WebSocketsサーバー
+    '''
 
     def __init__(self):
         '''
@@ -553,13 +680,21 @@ class clsWebSocketJyosetu:
         '''
         self.EnvData = clsEnvData()
 
+    def HandleError(self,pE):
+        '''
+        エラー処理
+        '''
+        self.LogOut(pE)
+
     async def Start(self):
         '''
         サーバの開始
         '''
+        cur = inspect.currentframe().f_code.co_name
+
         #DBの作成
         self.JyosetuDB = clsDB() 
-        self.JyosetuDB.DbOpen()
+        #self.JyosetuDB.DbOpen()
         self.JyosetuDB.CreateDb()
 
         #コマンドの送信オブジェクト設定
@@ -584,10 +719,10 @@ class clsWebSocketJyosetu:
         await server.wait_closed()
 
     async def WebSocketHandler(self,websocket, path):
-        
         '''
         WebSocketの処理
         '''
+        cur = inspect.currentframe().f_code.co_name
         try:
             async for message in websocket:
 
@@ -601,15 +736,23 @@ class clsWebSocketJyosetu:
                 #print(f"Received message: {message}")
 
                 jsonMsg = json.loads(message)
-                self.JyosetuDB.InsertCommand(jsonMsg)
-
+                self.InsertCommandDaemon(jsonMsg)
+                
                 #await websocket.send(f"Echo: {message}")
         except websockets.exceptions.ConnectionClosedError as e:
-            print(f"Connection closed: {e}")
+            self.HandleError(cur,e)
             self.RunExit()
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            self.HandleError(cur,e)
             self.RunExit()
+
+    def InsertCommandDaemon(self,pJsonMsg):
+        '''
+        コマンドのDBへの書き込みデーモン
+        '''
+        thread = threading.Thread(target=self.JyosetuDB.InsertCommand,args=(pJsonMsg))
+        thread.daemon = True
+        thread.start()
 
     def signal_handler(self,sig,frame):
         '''
@@ -621,7 +764,7 @@ class clsWebSocketJyosetu:
         '''
         終了処理
         '''
-        self.JyosetuDB.DbClose()
+        #self.JyosetuDB.DbClose()
         self.SendCommand.Stop()
         #self.WebSocketServer.close()
 
