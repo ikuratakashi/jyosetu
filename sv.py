@@ -20,6 +20,7 @@ import threading
 from typing import List
 import signal
 import inspect
+from colorama import init, Fore, Back, Style
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
@@ -27,11 +28,100 @@ class clsLog:
     '''
     ログ出力
     '''
-    def LogOut(self,pMessage):
+
+    TYPE_ERR : str = "ERROR"
+    '''
+    ログタイプ:Error
+    '''
+
+    TYPE_LOG : str = "LOG"
+    '''
+    ログタイプ:Log
+    '''
+
+    TYPE_SENDCOMMAND : str = "SEND_CMD"
+    '''
+    ログタイプ:送信コマンド
+    '''
+
+    TYPE_SENDCOMMAND_AUTO : str = "SEND_CMD_A"
+    '''
+    ログタイプ:送信コマンド
+    '''
+
+    TYPE_SAVECOMMAND : str = "SAVE_CMD"
+    '''
+    ログタイプ:受信コマンドの保存
+    '''
+
+    F_ERR:str = Fore.RED
+    '''
+    エラーの色
+    '''
+    
+    F_OK:str = Fore.GREEN
+    '''
+    OKの色
+    '''
+
+    F_SEND_CMD:str = Fore.BLUE
+    '''
+    コマンドを送信した時の色
+    '''
+
+    F_SEND_A_CMD:str = f"{Fore.BLUE}{Back.LIGHTWHITE_EX}" 
+    '''
+    コマンドを送信した時の色（自動送信）
+    '''
+
+    F_SAVE_CMD:str = Fore.LIGHTBLUE_EX
+    '''
+    クライアントから受信したコマンドを保存したときの色
+    '''
+
+    F_DEF:str = ""
+    '''
+    デフォルト
+    '''
+
+    R:str = Style.RESET_ALL
+    '''
+    リセット
+    '''
+
+    def LogOut(self,pCur:str,pType:str,pMessage:str):
         '''
         出力
         '''
-        print(pMessage)
+        now = datetime.now()
+        now_time = now.strftime('%y-%m-%d %H:%M:%S:%f')[:-3]
+
+        if pType == self.TYPE_ERR:
+            '''
+            Error
+            '''
+            print(f"{self.F_ERR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
+        elif pType == self.TYPE_SENDCOMMAND:
+            '''
+            送信コマンド
+            '''
+            print(f"{self.F_SEND_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
+        elif pType == self.TYPE_SENDCOMMAND_AUTO:
+            '''
+            送信コマンド自動
+            '''
+            print(f"{self.F_SEND_A_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
+        elif pType == self.TYPE_SAVECOMMAND:
+            '''
+            コマンド保存
+            '''
+            print(f"{self.F_SAVE_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
+        else:
+            '''
+            通常ログ
+            '''
+            print(f"{self.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
+
 
 class clsError:
     '''
@@ -43,11 +133,11 @@ class clsError:
     ログ
     '''
 
-    def HandleError(self,pCur,pE):
+    def HandleError(self,pCur,pMessage):
         '''
         エラー処理
         '''
-        self.Log.LogOut(f"{pCur}:error:{pE}")
+        self.Log.LogOut(pCur=pCur,pType=clsLog.TYPE_ERR,pMessage=pMessage)
 
 
 def Openning():
@@ -79,6 +169,9 @@ class clsEnvData:
     TYPE_OPERATION : str = ""
     TYPE_SOUND : str = ""
     TYPE_AUTO : str = ""
+    WS_PING_TNTERVAL:int = 20
+    WS_PING_TIMEOUT:int = 20
+
 
     def __init__(self):
         '''
@@ -102,6 +195,15 @@ class clsEnvData:
         self.TYPE_OPERATION = os.getenv('TYPE_OPERATION')
         self.TYPE_SOUND = os.getenv('TYPE_SOUND')
         self.TYPE_AUTO = os.getenv('TYPE_AUTO')
+
+        try:
+            self.WS_PING_TIMEOUT = int(os.getenv('WS_PING_INTERVAL'))
+        except:
+            pass
+        try:
+            self.WS_PING_TIMEOUT = int(os.getenv('WS_PING_TIMEOUT'))
+        except:
+            pass
 
 class clsDB(clsLog,clsError):
 
@@ -209,7 +311,7 @@ class clsDB(clsLog,clsError):
         except sqlite3.Error as e :
             self.HandleError(cur,e)
 
-    def InsertCommand(self,pMessage):
+    async def InsertCommand(self,pMessage):
         '''
         コマンドを追加する
         '''
@@ -226,11 +328,10 @@ class clsDB(clsLog,clsError):
         #コマンドのタイプ
         try:
 
-            DB : clsDB = clsDB()
-            DB.DbOpen()
+            CurJyosetu = self.ConJyosetu.cursor()
+            CurJyosetu.execute('PRAGMA busy_timeout = 5000') 
 
-            CurJyosetu = DB.ConJyosetu.cursor()
-            CurJyosetu.execute('BEGIN TRANSACTION')
+            IsInsert : bool = False
 
             for action in pMessage['action']:
 
@@ -240,7 +341,6 @@ class clsDB(clsLog,clsError):
                     now_time = now.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3]
 
                     try:
-
 
                         #テーブル作成SQL
                         sql = f'''
@@ -262,17 +362,29 @@ class clsDB(clsLog,clsError):
                         )
                         '''
                         CurJyosetu.execute(sql)
+                        IsInsert = True
+
+                        sec="??"
+                        try:
+                            RecTime = datetime.strptime(action['time'], "%Y/%m/%d %H:%M:%S:%f")
+                            sec = (now - RecTime).total_seconds()
+                        except:
+                            pass
+
+                        self.LogOut(cur,clsLog.TYPE_SAVECOMMAND,f"Type={action['type']},Command={action['button']},Value={action['value']},{Back.GREEN}sec={sec}{Style.RESET_ALL}{clsLog.F_SAVE_CMD},SendTime:{action['time']},RecTime:{now_time}")
 
                     except sqlite3.Error as e:
                         self.HandleError(cur,e)
 
-            DB.ConJyosetu.commit()
+            if IsInsert :
+                #トランザクションを開始していない場合は、Commitは必要ないらしい
+                self.ConJyosetu.commit()
+                pass
 
         except sqlite3.Error as e:
             self.HandleError(cur,e)
-            DB.DbRollBack()
         finally:
-            DB.DbClose()
+            pass
 
 def Init():
     '''
@@ -289,14 +401,16 @@ class clsSendCommandData():
     Key : str
     Type : str
     Command : str
+    Quantity : str
 
-    def __init__(self, pKey:str,pType:str,pCommand:str):
+    def __init__(self, pKey:str,pType:str,pCommand:str,pQuantity:str):
         '''
         コンストラクタ
         '''
         self.Key = pKey
         self.Type = pType
         self.Command = pCommand
+        self.Quantity = pQuantity
 
 class enmAutoClutchActionType(Enum):
     '''
@@ -315,7 +429,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     除雪のWebSocketクラス
     '''
 
-    DbObserver : any
+    DbObserver : Observer = None
     '''
     DBファイル更新の監視
     '''
@@ -365,6 +479,16 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     DBの更新中
     '''
 
+    CommandSendThred : threading.Thread = None
+    '''
+    DBの更新チェックスレッド
+    '''
+
+    IsCommandSendEnd : bool = False
+    '''
+    DBの更新チェックスレッドの終了フラグ
+    '''
+
     def __init__(self,pDb:clsDB):
         '''
         コンストラクタ
@@ -378,27 +502,30 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
 
         #DBファイルの更新の監視を行う処理を開始
-        self.DbObserver = Observer()
-        self.DbObserver.schedule(self,path='.',recursive=False)
-        self.DbObserver.start()
+        #self.DbObserver = Observer()
+        #self.DbObserver.schedule(self,path='.',recursive=False)
+        #self.DbObserver.start()
 
-        #自動クラッチアップの開始
+        #自動クラッチアップのスレッド開始
         self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
-
         #一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する をチェックするためのスレッドを開始
-        self.StartAutoClutchUpIfIdleStartThred()
+        self.StartAutoClutchUpIfIdleThreadStart()
+        #コマンド送信のスレッド開始
+        self.CommandSendThredStart()
 
     def Stop(self):
         '''
         処理の停止
         '''
-        self.DbObserver.stop()
-        self.DbObserver.join()
+        #self.DbObserver.stop()
+        #self.DbObserver.join()
 
-        self.IsCommandSendCheckThredEnd = True
-        self.CommandSendCheckThred.join()
-
+        #自動クラッチアップのスレッド終了
+        self.StartAutoClutchUpIfIdleThreadEnd()
+        #一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する をチェックするためのスレッド終了
         self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.STOP)
+        #コマンド送信のスレッド開始
+        self.CommandSendThredEnd()
 
     def on_modified(self,event):
         '''
@@ -417,6 +544,30 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
             #コマンドの送信
             if self.IsDbUpdate == False:
                 self.CommandSendDaemon()
+
+    def CommandSendRun(self):
+        '''
+        DBチェックのスレッド
+        '''
+        while not self.IsCommandSendEnd:
+            self.CommandSend()
+            time.sleep(1)
+
+    def CommandSendThredStart(self):
+        '''
+        DBチェックのスレッドスタート
+        '''
+        self.IsCommandSendEnd = False
+        self.CommandSendThred = threading.Thread(target=self.CommandSendRun)
+        self.CommandSendThred.start()
+
+    def CommandSendThredEnd(self):
+        '''
+        DBチェックのスレッド終了
+        '''
+        if self.CommandSendThred != None:
+            self.IsCommandSendEnd = True
+            self.CommandSendThred.join()
 
     def CommandSendDaemon(self):
         '''
@@ -442,6 +593,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         自動クラッチアップの実行を判定
         '''
+        cur = inspect.currentframe().f_code.co_name
         Now : datetime = datetime.now()
         IsClutchDown : bool = False
         sec : float = 0.0
@@ -463,8 +615,12 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
                 self.BefCluchDownTime = Now
 
             sec = (Now - self.BefCluchDownTime).total_seconds()
-            if sec > 2 :
+
+            self.LogOut(cur,clsLog.TYPE_LOG,f"前回のclutch_dw送信から {sec}秒 ")
+
+            if sec > 4 :
                 IsStart = True
+                
             self.BefCluchDownTime = Now
         
         if IsStart :
@@ -472,12 +628,21 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
             if self.IsAutoClutchThredEnd == True:
                 self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
     
-    def StartAutoClutchUpIfIdleStartThred(self):
+    def StartAutoClutchUpIfIdleThreadStart(self):
         '''
         一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する をチェックするためのスレッドを起動する
         '''
+        self.IsCommandSendCheckThredEnd = False
         self.CommandSendCheckThred = threading.Thread(target=self.StartAutoClutchUpIfIdle)
         self.CommandSendCheckThred.start()
+
+    def StartAutoClutchUpIfIdleThreadEnd(self):
+        '''
+        一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する をチェックするためのスレッドを終了する
+        '''
+        if self.CommandSendCheckThred != None:
+            self.IsCommandSendCheckThredEnd = True
+            self.CommandSendCheckThred.join()
 
     def StartAutoClutchUpIfIdle(self):
         '''
@@ -504,9 +669,12 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         実際のコマンドの送信
         '''
+        cur = inspect.currentframe().f_code.co_name
         env = self.JyosetuDB.EnvData
-        if pCommand.Type != env.TYPE_AUTO:
-            print(f"Send Command: Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command}")
+        if pCommand.Type == env.TYPE_AUTO:
+            self.LogOut(cur,clsLog.TYPE_SENDCOMMAND_AUTO,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+        else:
+            self.LogOut(cur,clsLog.TYPE_SENDCOMMAND,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
 
     def DbReadSendCommand(self) -> List[clsSendCommandData]:
         '''
@@ -556,7 +724,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
                 try:
                     RecTime = datetime.strptime(row["RecTime"], "%Y-%m-%d %H:%M:%S:%f")
                     sec = (now - RecTime).total_seconds()
-                    print(f"now({now}) - RecTime({RecTime}) = {sec}")
+                    self.LogOut(cur,clsLog.TYPE_LOG,f"now({now})-RecTime({RecTime}) = {sec}")
                 except:
                     pass
 
@@ -572,14 +740,15 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
                     ID = ?
                 '''
 
-                cursor.execute('PRAGMA busy_timeout = 5000')
+                cursor.execute('PRAGMA busy_timeout = 10000')
                 cursor.execute(sql,(1,now_time,row["ID"]))
 
                 Commands.append(
                     clsSendCommandData(
                         pKey = row["ID"],
                         pType = row["Type"],
-                        pCommand = row["Command"]
+                        pCommand = row["Command"],
+                        pQuantity = row["Quantity"]
                     )
                 )
 
@@ -649,22 +818,22 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         クラッチのコマンドを送り続ける コマンド送信
         '''
-        SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up")
+        SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=5)
         while not self.IsAutoClutchThredEndStart:
             self.SendCommand(SendCommand)
-            #time.sleep(0.25)
+            time.sleep(1.0)
     
 class clsWebSocketJyosetu(clsLog,clsError):
     '''
     除雪のWebSocketサーバー
     '''
 
-    JyosetuDB : clsDB
+    JyosetuDB : clsDB = None
     '''
     除雪のDB
     '''
 
-    SendCommand : clsSendCommandFromDB
+    SendCommand : clsSendCommandFromDB = None
     '''
     コマンドの送信
     '''
@@ -680,11 +849,11 @@ class clsWebSocketJyosetu(clsLog,clsError):
         '''
         self.EnvData = clsEnvData()
 
-    def HandleError(self,pE):
+    def HandleError(self,pCur,pE):
         '''
         エラー処理
         '''
-        self.LogOut(pE)
+        self.LogOut(pCur,clsLog.TYPE_ERR,pE)
 
     async def Start(self):
         '''
@@ -694,15 +863,21 @@ class clsWebSocketJyosetu(clsLog,clsError):
 
         #DBの作成
         self.JyosetuDB = clsDB() 
-        #self.JyosetuDB.DbOpen()
         self.JyosetuDB.CreateDb()
+
+        #共通で使用するDBをオープンする
+        self.JyosetuDB.DbOpen()
 
         #コマンドの送信オブジェクト設定
         self.SendCommand = clsSendCommandFromDB(self.JyosetuDB)
         self.SendCommand.Start()
 
         #WebSocketサーバの開始
-        self.WebSocketServer = await websockets.serve(self.WebSocketHandler, host, port)
+        self.WebSocketServer = await websockets.serve(self.WebSocketHandler, 
+                                                      host, 
+                                                      port,
+                                                      ping_interval=self.EnvData.WS_PING_TNTERVAL,
+                                                      ping_timeout=self.EnvData.WS_PING_TIMEOUT)
 
         # ホスト名とIPアドレスの取得
         hostname = socket.gethostname()
@@ -717,6 +892,10 @@ class clsWebSocketJyosetu(clsLog,clsError):
         '''
         server.close()
         await server.wait_closed()
+
+    async def process_message(self,message):
+        # メッセージの処理
+        print(f"Processing message: {message}")
 
     async def WebSocketHandler(self,websocket, path):
         '''
@@ -736,21 +915,22 @@ class clsWebSocketJyosetu(clsLog,clsError):
                 #print(f"Received message: {message}")
 
                 jsonMsg = json.loads(message)
-                self.InsertCommandDaemon(jsonMsg)
+                #self.InsertCommandDaemon(jsonMsg)
+                asyncio.create_task(self.JyosetuDB.InsertCommand(jsonMsg))
                 
                 #await websocket.send(f"Echo: {message}")
         except websockets.exceptions.ConnectionClosedError as e:
             self.HandleError(cur,e)
-            self.RunExit()
+            #self.RunExit()
         except Exception as e:
             self.HandleError(cur,e)
-            self.RunExit()
+            #self.RunExit()
 
     def InsertCommandDaemon(self,pJsonMsg):
         '''
         コマンドのDBへの書き込みデーモン
         '''
-        thread = threading.Thread(target=self.JyosetuDB.InsertCommand,args=(pJsonMsg))
+        thread = threading.Thread(target=self.JyosetuDB.InsertCommand,args=(pJsonMsg,))
         thread.daemon = True
         thread.start()
 
@@ -764,7 +944,7 @@ class clsWebSocketJyosetu(clsLog,clsError):
         '''
         終了処理
         '''
-        #self.JyosetuDB.DbClose()
+        self.JyosetuDB.DbClose()
         self.SendCommand.Stop()
         #self.WebSocketServer.close()
 

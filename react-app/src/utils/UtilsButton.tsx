@@ -20,7 +20,7 @@ export interface UtilsButtonProps {
 /**
  *  ボタンを押し続けたときのメッセージを送信する時間間隔
  */
-const IntervalMs = 200;
+const IntervalMs = 1000;
 
 /**
  * ボタン
@@ -74,11 +74,15 @@ const UtilsButton: React.FC<UtilsButtonProps> = ({
      * 一定間隔でメッセージをサーバに送る
      */
     const startInterval = () =>{
+        const Value = (IntervalMs * 5) / 1000;
+        //if (NetworkManager){
+        //    NetworkManager.sendWsMessage(CleateJsonActionToStr(envsendcommand.type_operation,ButtonType,Value));
+        //} 
         const id = setInterval
                     (
                         () => {
                             if (NetworkManager){
-                                NetworkManager.sendWsMessage(CleateJsonActionToStr(envsendcommand.type_operation,ButtonType,1));
+                                NetworkManager.sendWsMessage(CleateJsonActionToStr(envsendcommand.type_operation,ButtonType,Value));
                             } 
                         }
                         , IntervalMs
