@@ -858,8 +858,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         if pActionType == enmAutoClutchActionType.START:
 
-            self.CommandSendQueueValue.BefCluchDownTime = None
-            self.CommandSendQueue.put(self.CommandSendQueueValue)
+            #self.CommandSendQueueValue.BefCluchDownTime = None
 
             #if self.AutoClutchThred == None or self.AutoClutchThred.is_alive() == False:
             if self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEndStart == None or self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == True:
@@ -875,7 +874,6 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
                 self.AutoClutchThred.join()
                 self.AutoClutchThred = None
                 self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd = True
-                self.AutoClutchSendCommandQueue.put(self.AutoClutchSendCommandQueueValue)
 
     def AutoClutchSendCommand(self):
         '''
