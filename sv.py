@@ -121,7 +121,7 @@ class clsLog:
             通常ログ
             '''
             print(f"{self.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-
+ 
 
 class clsError:
     '''
@@ -620,7 +620,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
             if sec > 4 :
                 IsStart = True
-                
+
             self.BefCluchDownTime = Now
         
         if IsStart :
