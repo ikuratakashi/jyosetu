@@ -683,7 +683,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         
         if IsStart :
             #自動クラッチアップ 開始
-            if self.CommandSendQueueValue.IsAutoClutchThredEnd == True:
+            if self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == True:
                 #self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
                 pass
     
@@ -859,6 +859,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         if pActionType == enmAutoClutchActionType.START:
 
             self.CommandSendQueueValue.BefCluchDownTime = None
+            self.CommandSendQueue.put(self.CommandSendQueueValue)
 
             #if self.AutoClutchThred == None or self.AutoClutchThred.is_alive() == False:
             if self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEndStart == None or self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == True:
