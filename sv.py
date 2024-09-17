@@ -21,6 +21,7 @@ from typing import List
 import signal
 import inspect
 from colorama import init, Fore, Back, Style
+import queue
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
@@ -419,6 +420,29 @@ class enmAutoClutchActionType(Enum):
     STOP = 0
     START = 1
 
+class clsCommandSendQueueValue():
+    '''
+    CommandSendにかかわる値で、スレッド間で共有する値
+    '''
+    BefCommandSendTime : datetime = None
+    '''
+    前回コマンドを送信した日時
+    '''
+    BefCluchDownTime : datetime = None
+    '''
+    前回CluchDownコマンドを送信した日時
+    '''
+
+class clsAutoClutchSendCommandQueueValue():
+    IsAutoClutchThredEnd : bool = None
+    '''
+    自動クラッチアップの終了フラグ
+    '''
+    IsAutoClutchThredEndStart : bool = None
+    '''
+    自動クラッチアップの終了フラグ 開始フラグ
+    '''
+
 class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     '''
     DBに保存されたコマンドを送信する
@@ -489,12 +513,34 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     DBの更新チェックスレッドの終了フラグ
     '''
 
+    CommandSendQueue : queue.Queue = None
+    '''
+    キュー
+    '''
+
+    AutoClutchSendCommandQueue : queue.Queue = None
+    '''
+    キュー
+    '''
+
+    CommandSendQueueValue : clsCommandSendQueueValue = clsCommandSendQueueValue()
+    '''
+    CommandSendにかかわる値で、スレッド間で共有する値
+    '''
+    
+    AutoClutchSendCommandQueueValue : clsAutoClutchSendCommandQueueValue = clsAutoClutchSendCommandQueueValue()
+    '''
+    AutoClutchSendCommandにかかわる値で、スレッド間で共有する値
+    '''
+
     def __init__(self,pDb:clsDB):
         '''
         コンストラクタ
         '''
         super().__init__()
         self.JyosetuDB = pDb
+        self.CommandSendQueue = queue.Queue()
+        self.AutoClutchSendCommandQueue = queue.Queue()
 
     def Start(self):
         '''
@@ -550,7 +596,20 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         DBチェックのスレッド
         '''
         while not self.IsCommandSendEnd:
+
+            self.CommandSendQueueValue = self.CommandSendQueue.get()
+
+            if self.CommandSendQueueValue.BefCluchDownTime == None:
+                self.CommandSendQueueValue.BefCluchDownTime = datetime.now()
+
+            if self.CommandSendQueueValue.BefCommandSendTime == None:
+                self.CommandSendQueueValue.BefCommandSendTime = datetime.now()
+
+            # コマンドの送信
             self.CommandSend()
+
+            self.CommandSendQueue.put(self.CommandSendQueueValue)
+            self.CommandSendQueue.task_done()
             time.sleep(1)
 
     def CommandSendThredStart(self):
@@ -560,6 +619,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         self.IsCommandSendEnd = False
         self.CommandSendThred = threading.Thread(target=self.CommandSendRun)
         self.CommandSendThred.start()
+
+        self.CommandSendQueue.put(self.CommandSendQueueValue)
 
     def CommandSendThredEnd(self):
         '''
@@ -587,7 +648,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         self.AutoClutchShouldStartStop(Commands)
         #コマンドを送信した日時を保存
         if len(Commands) > 0 :
-            self.BefCommandSendTime = datetime.now()
+            self.CommandSendQueueValue.BefCommandSendTime = datetime.now()
 
     def AutoClutchShouldStartStop(self,pCommands:List[clsSendCommandData]):
         '''
@@ -599,8 +660,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         sec : float = 0.0
         IsStart : bool = False
 
-        if self.BefCluchDownTime == None:
-            self.BefCluchDownTime = Now
+        if self.CommandSendQueueValue.BefCluchDownTime == None:
+            self.CommandSendQueueValue.BefCluchDownTime = Now
 
         for Command in pCommands:
             if Command.Command == "clutch_dw":
@@ -611,22 +672,20 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
         if IsClutchDown == True:
 
-            if self.BefCluchDownTime == None:
-                self.BefCluchDownTime = Now
-
-            sec = (Now - self.BefCluchDownTime).total_seconds()
+            sec = (Now - self.CommandSendQueueValue.BefCluchDownTime).total_seconds()
 
             self.LogOut(cur,clsLog.TYPE_LOG,f"前回のclutch_dw送信から {sec}秒 ")
 
             if sec > 4 :
                 IsStart = True
 
-            self.BefCluchDownTime = Now
+            self.CommandSendQueueValue.BefCluchDownTime = Now
         
         if IsStart :
             #自動クラッチアップ 開始
-            if self.IsAutoClutchThredEnd == True:
-                self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
+            if self.CommandSendQueueValue.IsAutoClutchThredEnd == True:
+                #self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
+                pass
     
     def StartAutoClutchUpIfIdleThreadStart(self):
         '''
@@ -799,28 +858,40 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         if pActionType == enmAutoClutchActionType.START:
 
-            self.BefCluchDownTime = None
+            self.CommandSendQueueValue.BefCluchDownTime = None
 
             #if self.AutoClutchThred == None or self.AutoClutchThred.is_alive() == False:
-            if self.IsAutoClutchThredEndStart == None or self.IsAutoClutchThredEnd == True:
-                self.IsAutoClutchThredEndStart = False
-                self.IsAutoClutchThredEnd = False
+            if self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEndStart == None or self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == True:
+                self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEndStart = False
+                self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd = False
                 self.AutoClutchThred = threading.Thread(target=self.AutoClutchSendCommand)
                 self.AutoClutchThred.start()
+                self.AutoClutchSendCommandQueue.put(self.AutoClutchSendCommandQueueValue)
+
         else:
             if self.AutoClutchThred != None:
-                self.IsAutoClutchThredEndStart = True
+                self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEndStart = True
                 self.AutoClutchThred.join()
                 self.AutoClutchThred = None
-                self.IsAutoClutchThredEnd = True
+                self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd = True
+                self.AutoClutchSendCommandQueue.put(self.AutoClutchSendCommandQueueValue)
 
     def AutoClutchSendCommand(self):
         '''
         クラッチのコマンドを送り続ける コマンド送信
         '''
         SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=5)
-        while not self.IsAutoClutchThredEndStart:
+        while not self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEndStart:
+
+            self.AutoClutchSendCommandQueueValue = self.AutoClutchSendCommandQueue.get()
+
             self.SendCommand(SendCommand)
+
+            self.AutoClutchSendCommandQueue.put(self.AutoClutchSendCommandQueueValue)
+            self.AutoClutchSendCommandQueue.task_done()
+
+            print(self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEndStart)
+
             time.sleep(1.0)
     
 class clsWebSocketJyosetu(clsLog,clsError):
