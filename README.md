@@ -63,6 +63,12 @@ git pull
 chmod 777 gitpull.sh
 ```
 
+## 現在のブランチを表示
+
+```bash
+git branch
+```
+
 ## 起動方法
 ```bash
 ./momo_st.sh
