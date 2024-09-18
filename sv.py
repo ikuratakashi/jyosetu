@@ -539,8 +539,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         super().__init__()
         self.JyosetuDB = pDb
-        self.CommandSendQueue = queue.Queue()
-        self.AutoClutchSendCommandQueue = queue.Queue()
+        #self.CommandSendQueue = queue.Queue()
+        #self.AutoClutchSendCommandQueue = queue.Queue()
 
     def Start(self):
         '''
@@ -553,7 +553,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         #self.DbObserver.start()
 
         #自動クラッチアップのスレッド開始
-        self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
+        self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.START)
         #一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する をチェックするためのスレッドを開始
         self.StartAutoClutchUpIfIdleThreadStart()
         #コマンド送信のスレッド開始
@@ -569,7 +569,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         #自動クラッチアップのスレッド終了
         self.StartAutoClutchUpIfIdleThreadEnd()
         #一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する をチェックするためのスレッド終了
-        self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.STOP)
+        self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.STOP)
         #コマンド送信のスレッド開始
         self.CommandSendThredEnd()
 
@@ -595,9 +595,9 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         DBチェックのスレッド
         '''
-        while not self.IsCommandSendEnd:
+        while self.IsCommandSendEnd == False:
 
-            self.CommandSendQueueValue = self.CommandSendQueue.get()
+            #self.CommandSendQueueValue = self.CommandSendQueue.get()
 
             if self.CommandSendQueueValue.BefCluchDownTime == None:
                 self.CommandSendQueueValue.BefCluchDownTime = datetime.now()
@@ -608,8 +608,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
             # コマンドの送信
             self.CommandSend()
 
-            self.CommandSendQueue.put(self.CommandSendQueueValue)
-            self.CommandSendQueue.task_done()
+            #self.CommandSendQueue.put(self.CommandSendQueueValue)
+            #self.CommandSendQueue.task_done()
             time.sleep(1)
 
     def CommandSendThredStart(self):
@@ -620,7 +620,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         self.CommandSendThred = threading.Thread(target=self.CommandSendRun)
         self.CommandSendThred.start()
 
-        self.CommandSendQueue.put(self.CommandSendQueueValue)
+        #self.CommandSendQueue.put(self.CommandSendQueueValue)
 
     def CommandSendThredEnd(self):
         '''
@@ -660,17 +660,17 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         sec : float = 0.0
         IsStart : bool = False
 
-        if self.CommandSendQueueValue.BefCluchDownTime == None:
-            self.CommandSendQueueValue.BefCluchDownTime = Now
-
         for Command in pCommands:
             if Command.Command == "clutch_dw":
                 #自動クラッチアップ ストップ
-                self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.STOP)
+                self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.STOP)
                 IsClutchDown = True
                 break
 
         if IsClutchDown == True:
+
+            if self.CommandSendQueueValue.BefCluchDownTime == None:
+                self.CommandSendQueueValue.BefCluchDownTime = Now
 
             sec = (Now - self.CommandSendQueueValue.BefCluchDownTime).total_seconds()
 
@@ -683,7 +683,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         
         if IsStart :
             #自動クラッチアップ 開始
-            self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
+            self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.START)
             pass
     
     def StartAutoClutchUpIfIdleThreadStart(self):
@@ -706,7 +706,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する
         '''
-        while not self.IsCommandSendCheckThredEnd:
+        while self.IsCommandSendCheckThredEnd == False:
             
             Now :datetime = datetime.now()
             sec : float = 0.0
@@ -721,7 +721,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
             if IsStart :
                 #自動クラッチアップ 開始
-                self.AutoClutchSendCommandStartStop(pActionType=enmAutoClutchActionType.START)
+                self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.START)
 
     def SendCommand(self,pCommand:clsSendCommandData):
         '''
@@ -848,7 +848,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
         return Commands
 
-    def AutoClutchSendCommandStartStop(self,pActionType:enmAutoClutchActionType):
+    def AutoClutchSendCommandThreadStartStop(self,pActionType:enmAutoClutchActionType):
         '''
         クラッチのコマンドを送り続ける 停止／再開
 
@@ -876,7 +876,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         クラッチのコマンドを送り続ける コマンド送信
         '''
         SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=5)
-        while self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd:
+        while self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == False:
             self.SendCommand(SendCommand)
             time.sleep(1.0)
     
