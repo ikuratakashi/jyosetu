@@ -8,7 +8,7 @@ import websockets  # type: ignore
 import socket
 import os
 import platform
-from datetime import datetime
+from datetime import datetime,timedelta
 from dotenv import load_dotenv  # type: ignore
 import sqlite3
 import json
@@ -172,6 +172,7 @@ class clsEnvData:
     TYPE_AUTO : str = ""
     WS_PING_TNTERVAL:int = 20
     WS_PING_TIMEOUT:int = 20
+    DB_COM_BEFTIME:int = 30
 
 
     def __init__(self):
@@ -205,6 +206,12 @@ class clsEnvData:
             self.WS_PING_TIMEOUT = int(os.getenv('WS_PING_TIMEOUT'))
         except:
             pass
+        try:
+            self.DB_COM_BEFTIME = int(os.getenv('DB_COM_BEFTIME'))
+        except:
+            pass
+
+        
 
 class clsDB(clsLog,clsError):
 
@@ -766,9 +773,12 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
             conn.row_factory = sqlite3.Row 
             cursor = conn.cursor()
 
+            WhereTimeDateTime = datetime.now() - timedelta(seconds=env.DB_COM_BEFTIME)
+            WhereTime = WhereTimeDateTime.strftime('%Y-%m-%d %H:%M:%S.%f')
+
             sql = f'''
             Select * From {env.DB_TBL_COMMAND} 
-            Where ExecFlag IS NULL
+            Where ExecFlag IS NULL and SendTime >= '{WhereTime}'
             Order by SUBSTR(Type,1,6),SendTime
             '''
 
@@ -860,18 +870,18 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
             pEnabled (bool): 挨拶する相手の名前
         '''
         if pActionType == enmAutoClutchActionType.START:
-
             if self.AutoClutchSendCommandQueueValue.IsAutoClutchThredRunning == False:
-
                 self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd = False
                 self.AutoClutchSendCommandQueueValue.IsAutoClutchThredRunning = True
                 self.AutoClutchThred = threading.Thread(target=self.AutoClutchSendCommand)
                 self.AutoClutchThred.start()
-
         else:
-            if self.AutoClutchThred != None:
+            if self.AutoClutchThred != None and self.AutoClutchSendCommandQueueValue.IsAutoClutchThredRunning == True:
                 self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd = True
-                self.AutoClutchThred.join()
+                try:
+                    self.AutoClutchThred.join()
+                except Exception as e:
+                    pass
                 self.AutoClutchThred = None
                 self.AutoClutchSendCommandQueueValue.IsAutoClutchThredRunning = False
 
