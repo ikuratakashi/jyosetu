@@ -599,11 +599,13 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
             #self.CommandSendQueueValue = self.CommandSendQueue.get()
 
-            if self.CommandSendQueueValue.BefCluchDownTime == None:
-                self.CommandSendQueueValue.BefCluchDownTime = datetime.now()
-
-            if self.CommandSendQueueValue.BefCommandSendTime == None:
-                self.CommandSendQueueValue.BefCommandSendTime = datetime.now()
+            #
+            #if self.CommandSendQueueValue.BefCluchDownTime == None:
+            #    self.CommandSendQueueValue.BefCluchDownTime = datetime.now()
+            #
+            #if self.CommandSendQueueValue.BefCommandSendTime == None:
+            #    self.CommandSendQueueValue.BefCommandSendTime = datetime.now()
+            #
 
             # コマンドの送信
             self.CommandSend()
@@ -683,7 +685,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         
         if IsStart :
             #自動クラッチアップ 開始
-            self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.START)
+            #self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.START)
             pass
     
     def StartAutoClutchUpIfIdleThreadStart(self):
@@ -706,22 +708,24 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する
         '''
+        cur = inspect.currentframe().f_code.co_name
         while self.IsCommandSendCheckThredEnd == False:
             
             Now :datetime = datetime.now()
             sec : float = 0.0
             IsStart : bool = False
 
-            if self.BefCommandSendTime == None:
-                self.BefCommandSendTime = Now
-            
-            sec = (Now - self.BefCommandSendTime).total_seconds()
-            if sec > 2 :
-                IsStart = True
+            if self.CommandSendQueueValue.BefCommandSendTime != None:
+                sec = (Now - self.CommandSendQueueValue.BefCommandSendTime).total_seconds()
+                #self.LogOut(cur,clsLog.TYPE_LOG,f"前回の何かしらのボタンダウン送信から {sec}秒 ")
+                if sec > 2 :
+                    IsStart = True
 
-            if IsStart :
-                #自動クラッチアップ 開始
-                self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.START)
+                if IsStart :
+                    #自動クラッチアップ 開始
+                    self.AutoClutchSendCommandThreadStartStop(pActionType=enmAutoClutchActionType.START)
+                    self.CommandSendQueueValue.BefCommandSendTime = None
+                    pass
 
     def SendCommand(self,pCommand:clsSendCommandData):
         '''
