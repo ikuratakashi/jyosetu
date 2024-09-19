@@ -2,17 +2,18 @@ version = "10.2.101"
 PgName = "Jyosetu Message Server"
 
 import sys
+
 sys.path.append('lib')
 import asyncio
 import websockets  # type: ignore
 import socket
-import os
 import platform
 from datetime import datetime,timedelta
 from dotenv import load_dotenv  # type: ignore
 import sqlite3
 import json
 from enum import Enum
+import os
 import time
 from watchdog.observers import Observer # type: ignore
 from watchdog.events import FileSystemEventHandler # type: ignore
@@ -20,128 +21,18 @@ import threading
 from typing import List
 import signal
 import inspect
-from colorama import init, Fore, Back, Style # type: ignore
 import queue
 import RPi.GPIO as GPIO
 import subprocess
 import pigpio
 import copy
+import serial
+from env import clsEnvData 
+from Log import clsLog
+from colorama import Back, Style
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
-class clsLog:
-    '''
-    ログ出力
-    '''
-
-    TYPE_ERR : str = "ERROR"
-    '''
-    ログタイプ:Error
-    '''
-
-    TYPE_WAR : str = "WARNING"
-    '''
-    ログタイプ:WARNING
-    '''
-
-    TYPE_LOG : str = "LOG"
-    '''
-    ログタイプ:Log
-    '''
-
-    TYPE_SENDCOMMAND : str = "SEND_CMD"
-    '''
-    ログタイプ:送信コマンド
-    '''
-
-    TYPE_SENDCOMMAND_AUTO : str = "SEND_CMD_A"
-    '''
-    ログタイプ:送信コマンド
-    '''
-
-    TYPE_SAVECOMMAND : str = "SAVE_CMD"
-    '''
-    ログタイプ:受信コマンドの保存
-    '''
-
-    F_ERR:str = Fore.RED
-    '''
-    エラーの色
-    '''
-
-    F_WAR:str = Fore.YELLOW
-    '''
-    ワーニングの色
-    '''
-    
-    F_OK:str = Fore.GREEN
-    '''
-    OKの色
-    '''
-
-    F_SEND_CMD:str = Fore.BLUE
-    '''
-    コマンドを送信した時の色
-    '''
-
-    F_SEND_A_CMD:str = f"{Fore.BLUE}{Back.LIGHTWHITE_EX}" 
-    '''
-    コマンドを送信した時の色（自動送信）
-    '''
-
-    F_SAVE_CMD:str = Fore.LIGHTBLUE_EX
-    '''
-    クライアントから受信したコマンドを保存したときの色
-    '''
-
-    F_DEF:str = ""
-    '''
-    デフォルト
-    '''
-
-    R:str = Style.RESET_ALL
-    '''
-    リセット
-    '''
-
-    def LogOut(self,pCur:str,pType:str,pMessage:str):
-        '''
-        出力
-        '''
-        now = datetime.now()
-        now_time = now.strftime('%y-%m-%d %H:%M:%S:%f')[:-3]
-
-        if pType == self.TYPE_ERR:
-            '''
-            Error
-            '''
-            print(f"{self.F_ERR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        if pType == self.TYPE_WAR:
-            '''
-            ワーニング
-            '''
-            print(f"{self.F_WAR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-
-        elif pType == self.TYPE_SENDCOMMAND:
-            '''
-            送信コマンド
-            '''
-            print(f"{self.F_SEND_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        elif pType == self.TYPE_SENDCOMMAND_AUTO:
-            '''
-            送信コマンド自動
-            '''
-            print(f"{self.F_SEND_A_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        elif pType == self.TYPE_SAVECOMMAND:
-            '''
-            コマンド保存
-            '''
-            print(f"{self.F_SAVE_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        else:
-            '''
-            通常ログ
-            '''
-            print(f"{self.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
 
 class clsError:
     '''
@@ -177,68 +68,6 @@ def Openning():
     print('')
     print('')
     
-class clsEnvData:
-    '''
-    環境設定ファイルを取得する
-    '''
-
-    VERSION : str = ""
-    DB_JYOSETU : str = ""
-    DB_JYOSETU_MODE : str = ""
-    DB_TBL_COMMAND : str = ""
-    TYPE_EMERGENCY : str = ""
-    TYPE_OPERATION : str = ""
-    TYPE_SOUND : str = ""
-    TYPE_AUTO : str = ""
-    WS_PING_TNTERVAL:int = 20
-    WS_PING_TIMEOUT:int = 20
-    DB_COM_BEFTIME:int = 30
-
-    GP_NO_clutch_up_down:int = 2 
-
-
-    def __init__(self):
-        '''
-        コンストラクタ
-        '''
-
-        load_dotenv()
-
-        now = datetime.now()
-        now_time = now.strftime('%Y%m%d%H%M%S%f')[:-3]
-
-        self.VERSION = os.getenv('VERSION')
-        self.DB_JYOSETU_MODE = os.getenv('DB_JYOSETU_MODE')
-        if self.DB_JYOSETU_MODE == "ONE":
-            self.DB_JYOSETU = f"{os.getenv('DB_JYOSETU')}.db"
-        else:
-            self.DB_JYOSETU = f"{os.getenv('DB_JYOSETU')}_{now_time}.db"
-        self.DB_TBL_COMMAND = os.getenv('DB_TBL_COMMAND')
-
-        self.TYPE_EMERGENCY = os.getenv('TYPE_EMERGENCY')
-        self.TYPE_OPERATION = os.getenv('TYPE_OPERATION')
-        self.TYPE_SOUND = os.getenv('TYPE_SOUND')
-        self.TYPE_AUTO = os.getenv('TYPE_AUTO')
-
-        try:
-            self.WS_PING_TIMEOUT = int(os.getenv('WS_PING_INTERVAL'))
-        except:
-            pass
-        try:
-            self.WS_PING_TIMEOUT = int(os.getenv('WS_PING_TIMEOUT'))
-        except:
-            pass
-        try:
-            self.DB_COM_BEFTIME = int(os.getenv('DB_COM_BEFTIME'))
-        except:
-            pass
-
-        #GOPI関連
-        try:
-            self.GP_NO_clutch_up_down = int(os.getenv('GP_NO_clutch_up_down'))
-        except:
-            pass
-
 class clsDB(clsLog,clsError):
 
     EnvData : clsEnvData
@@ -645,6 +474,228 @@ class clsCommandToGPIO(clsLog):
                 self.clutch_angle = 0
                 break
 
+class clsCommandToRS232C(clsLog,clsError):
+    '''
+    コマンドをRS232Cで送る
+    '''
+    
+    EnvData : clsEnvData
+    '''
+    環境設定ファイル
+    '''
+
+    CmdClutchQues : List[clsSendCommandData] = []
+    '''
+    クラッチのキュー
+    '''
+
+    IsCommandSendClutchThredStop : bool = False
+    '''
+    スレッドの実行をストップするフラグ
+    '''
+
+    CommandSendClutchThred : threading.Thread = None
+    '''
+    クラッチコマンドを送信するスレッド
+    '''
+
+    CmmandSendSerial : serial.Serial = None
+    '''
+    コマンドを送るシリアルポート
+    '''
+
+    def __init__(self):
+        '''
+        コンストラクタ
+        '''
+        self.EnvData = clsEnvData()
+
+        e = self.EnvData
+        self.CmmandSendSerial = serial.Serial(e.RS232C_DEV_SEND,e.RS232C_BPS,timeout=e.RS232C_TIMEOUT) 
+
+    def Stop(self):
+        '''
+        スレッドを停止する
+        '''
+        self.CommandSendClutchThredStop()
+        self.CmmandSendSerial.close()
+
+    def CommandSendClutchThredStart(self):
+        '''
+        クラッチのスレッドを開始する
+        '''
+        self.IsCommandSendClutchThredStop == False
+        if self.CommandSendClutchThred == None:
+            self.CommandSendClutchThred = threading.Thread(target=self.SendCommandClutch)
+            self.CommandSendClutchThred.start()
+
+    def CommandSendClutchThredStop(self):
+        '''
+        クラッチのスレッドを止める
+        '''
+        self.IsCommandSendClutchThredStop = True
+        if self.CommandSendClutchThred != None:
+            self.CommandSendClutchThred.join()
+            self.CommandSendClutchThred = None
+
+    def SendCommandClutch(self):
+        '''
+        クラッチのスレッドを開始する
+        '''
+        while self.IsCommandSendClutchThredStop == False:
+
+            while self.CmdClutchQues:
+
+                Cmd : clsSendCommandData = self.CmdClutchQues.pop()
+
+                if Cmd.Command == "clutch_up":
+                    self.Clutch_UP(Cmd)
+                    pass
+                elif Cmd.Command == "clutch_dw":
+                    self.Clutch_DOWN(Cmd)
+                    pass
+                else:
+                    pass
+
+    
+    def Send(self,pCmd:clsSendCommandData):
+        '''
+        コマンドをデバイスに送信する
+        '''
+
+        # クラッチの情報送信用のスレッドを開始
+        self.CommandSendClutchThredStart()
+
+        if pCmd.Command == "clutch_up":
+            # キューへコマンドを追加
+            self.CmdClutchQues.append(copy.deepcopy(pCmd))
+        elif pCmd.Command == "clutch_dw":
+            # キューへコマンドを追加
+            self.CmdClutchQues.append(copy.deepcopy(pCmd))
+        elif pCmd.Command == "clutch_up":
+            self.SendDevice("c_up")
+        elif pCmd.Command == "accel_up":
+            #アクセル アップ
+            self.SendDevice("a_up")
+        elif pCmd.Command == "accel_dw":
+            #アクセル ダウン
+            self.SendDevice("a_dw")
+        elif pCmd.Command == "move_fw":
+            #移動 前進
+            self.SendDevice("m_fw")
+        elif pCmd.Command == "move_bk":
+            #移動 後進
+            self.SendDevice("m_bk")
+        elif pCmd.Command == "move_right":
+            #移動 右
+            self.SendDevice("m_r")
+        elif pCmd.Command == "move_left":
+            #移動 左
+            self.SendDevice("m_l")
+        elif pCmd.Command == "chute_L_lup":
+            #雪射出口 左上向き
+            self.SendDevice("c_L_lup")
+        elif pCmd.Command == "chute_L_up":
+            #雪射出口 上向き
+            self.SendDevice("c_L_up")
+        elif pCmd.Command == "chute_L_rup":
+            #雪射出口 右上向き
+            self.SendDevice("c_L_rup")
+        elif pCmd.Command == "chute_L_right":
+            #雪射出口 右向き
+            self.SendDevice("c_L_right")
+        elif pCmd.Command == "chute_L_rdw":
+            #雪射出口 右下向き
+            self.SendDevice("c_L_rdw")
+        elif pCmd.Command == "chute_L_dw":
+            #雪射出口 下向き
+            self.SendDevice("c_L_dw")
+        elif pCmd.Command == "chute_L_ldw":
+            #雪射出口 左下向き
+            self.SendDevice("c_L_ldw")
+        elif pCmd.Command == "chute_L_left":
+            #雪射出口 左向き
+            self.SendDevice("c_L_left")
+        elif pCmd.Command == "chute_R_lup":
+            #雪射出口 スティック右 左上向き
+            self.SendDevice("c_R_lup")
+        elif pCmd.Command == "chute_R_up":
+            #雪射出口 上向き
+            self.SendDevice("c_R_up")
+        elif pCmd.Command == "chute_R_rup":
+            #雪射出口 右上向き
+            self.SendDevice("c_R_rup")
+        elif pCmd.Command == "chute_R_right":
+            #雪射出口 右向き
+            self.SendDevice("c_R_right")
+        elif pCmd.Command == "chute_R_rdw":
+            #雪射出口 右下向き
+            self.SendDevice("c_R_rdw")
+        elif pCmd.Command == "chute_R_dw":
+            #雪射出口 下向き
+            self.SendDevice("c_R_dw")
+        elif pCmd.Command == "chute_R_ldw":
+            #雪射出口 左下向き
+            self.SendDevice("c_R_ldw")
+        elif pCmd.Command == "chute_R_left":
+            #雪射出口 左向き
+            self.SendDevice("c_R_left")
+        elif pCmd.Command == "btn_sankaku":
+            #未設定ボタン△
+            self.SendDevice("btn_sankaku")
+        elif pCmd.Command == "btn_sikaku":
+            #未設定ボタン□
+            self.SendDevice("btn_sikaku")
+        elif pCmd.Command == "btn_on":
+            #歯の回転のON
+            self.SendDevice("on")
+        elif pCmd.Command == "btn_off":
+            #歯の回転のOFF
+            self.SendDevice("off")
+        elif pCmd.Command == "btn_em":
+            #緊急停止
+            self.SendDevice("em")
+        else:
+            pass
+    
+    def SendDevice(self,pCmd:str):
+        '''
+        デバイスへコマンドを送信する
+        '''
+        cur = inspect.currentframe().f_code.co_name
+        try:
+            self.CmmandSendSerial.write(pCmd.encode('utf-8'))
+        except Exception as e:
+            self.HandleError(cur,f"{e}")
+
+    def Clutch_UP(self,pCmd:clsSendCommandData):
+        '''
+        クラッチ アップ
+        '''
+        e = self.EnvData
+        cnt = 0
+        max = pCmd.Quantity
+
+        while True:
+            cnt += 1
+            if cnt > max:
+                break
+            self.SendDevice("c_up")
+
+    def Clutch_DOWN(self,pCmd:clsSendCommandData):
+        '''
+        クラッチ ダウン
+        '''
+        e = self.EnvData
+        cnt = 0
+        max = pCmd.Quantity
+
+        while True:
+            cnt += 1
+            if cnt > max:
+                break
+            self.SendDevice("c_dw")
+
 class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     '''
     DBに保存されたコマンドを送信する
@@ -735,7 +786,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     AutoClutchSendCommandにかかわる値で、スレッド間で共有する値
     '''
 
-    CommandToDevice : clsCommandToGPIO
+    #CommandToDevice : clsCommandToGPIO
+    CommandToDevice : clsCommandToRS232C
     '''
     コマンドをデバイスに送信
     '''
@@ -746,7 +798,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         super().__init__()
         self.JyosetuDB = pDb
-        self.CommandToDevice = clsCommandToGPIO()
+        #self.CommandToDevice = clsCommandToGPIO()
+        self.CommandToDevice = clsCommandToRS232C()
         #self.CommandSendQueue = queue.Queue()
         #self.AutoClutchSendCommandQueue = queue.Queue()
 
@@ -1098,7 +1151,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         クラッチのコマンドを送り続ける コマンド送信
         '''
-        SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=5)
+        SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=self.JyosetuDB.EnvData.AUTO_CL_QUANTITY)
         while self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == False:
             self.SendCommand(SendCommand)
             time.sleep(1.0)
