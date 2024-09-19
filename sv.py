@@ -22,6 +22,8 @@ import signal
 import inspect
 from colorama import init, Fore, Back, Style # type: ignore
 import queue
+import RPi.GPIO as GPIO
+import pigpio
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
@@ -122,7 +124,6 @@ class clsLog:
             通常ログ
             '''
             print(f"{self.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
- 
 
 class clsError:
     '''
@@ -157,6 +158,7 @@ def Openning():
     print(f'Wellcome to {PgName}.')
     print('')
     print('')
+    
 class clsEnvData:
     '''
     環境設定ファイルを取得する
@@ -173,6 +175,8 @@ class clsEnvData:
     WS_PING_TNTERVAL:int = 20
     WS_PING_TIMEOUT:int = 20
     DB_COM_BEFTIME:int = 30
+
+    GP_NO_clutch_up_down:int = 2 
 
 
     def __init__(self):
@@ -211,7 +215,11 @@ class clsEnvData:
         except:
             pass
 
-        
+        #GOPI関連
+        try:
+            self.GP_NO_clutch_up_down = int(os.getenv('GP_NO_clutch_up_down'))
+        except:
+            pass
 
 class clsDB(clsLog,clsError):
 
@@ -450,6 +458,103 @@ class clsAutoClutchSendCommandQueueValue():
     自動クラッチアップの実行中かどうかのフラグ
     '''
 
+class clsCommandToGPIO:
+    '''
+    コマンドをGOIPへ送る
+    '''
+    
+    EnvData : clsEnvData
+    '''
+    環境設定ファイル
+    '''
+
+    pwm_clutch_up_down = None
+    '''
+    クラッチのアップとダウン
+    '''
+
+    clutch_angle = 0
+    '''
+    クラッチの角度
+    '''
+
+    pi : pigpio.pi
+    '''
+    PGIO
+    '''
+
+    def __init__(self):
+        '''
+        コンストラクタ
+        '''
+        self.EnvData = clsEnvData()
+        self.pi = pigpio.pi()
+        pass
+    
+    def Send(self,pCmd:clsSendCommandData):
+        '''
+        コマンドをデバイスに送信する
+        '''
+        if pCmd.Command == "clutch_up":
+            self.Clutch_UP(pCmd)
+        elif pCmd.Command == "clutch_dw":
+            self.Clutch_DOWN(pCmd)
+        else:
+            pass
+
+    def ServoSetAngle(self,angle,pIsStart:bool = False):
+        '''
+        サーボモータの角度の設定
+        '''
+        pulse_width = (angle / 180) * (2500 - 500) + 500
+        self.pi.set_servo_pulsewidth(self.EnvData.GP_NO_clutch_up_down,pulse_width)
+
+    def Clutch_UP(self,pCmd:clsSendCommandData):
+        '''
+        クラッチ アップ
+        '''
+        e = self.EnvData
+        cnt = 0
+        max = pCmd.Quantity
+
+        self.ServoSetAngle(self.clutch_angle,True)
+
+        while True:
+            cnt += 1
+            if cnt > max:
+                break
+            self.clutch_angle += 3
+            if self.clutch_angle <= 180:
+                self.ServoSetAngle(self.clutch_angle)
+                print(self.clutch_angle)
+                #time.sleep(0.3)
+            else:
+                self.clutch_angle = 180
+                break
+
+    def Clutch_DOWN(self,pCmd:clsSendCommandData):
+        '''
+        クラッチ ダウン
+        '''
+        e = self.EnvData
+        cnt = 0
+        max = pCmd.Quantity
+
+        self.ServoSetAngle(self.clutch_angle,True)
+
+        while True:
+            cnt += 1
+            if cnt > max:
+                break
+            self.clutch_angle -= 3
+            if self.clutch_angle >= 0:
+                self.ServoSetAngle(self.clutch_angle)
+                print(self.clutch_angle)
+                #time.sleep(0.3)
+            else:
+                self.clutch_angle = 0
+                break
+
 class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     '''
     DBに保存されたコマンドを送信する
@@ -538,6 +643,11 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     AutoClutchSendCommandQueueValue : clsAutoClutchSendCommandQueueValue = clsAutoClutchSendCommandQueueValue()
     '''
     AutoClutchSendCommandにかかわる値で、スレッド間で共有する値
+    '''
+
+    CommandToDevice : clsCommandToGPIO = clsCommandToGPIO()
+    '''
+    コマンドをデバイスに送信
     '''
 
     def __init__(self,pDb:clsDB):
@@ -744,6 +854,12 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
             self.LogOut(cur,clsLog.TYPE_SENDCOMMAND_AUTO,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
         else:
             self.LogOut(cur,clsLog.TYPE_SENDCOMMAND,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+
+        self.CommandToDevice.Send(pCommand)
+
+        #thread = threading.Thread(target=self.CommandToDevice.Send,args=(pCommand,))
+        #thread.daemon = True
+        #thread.start()
 
     def DbReadSendCommand(self) -> List[clsSendCommandData]:
         '''
