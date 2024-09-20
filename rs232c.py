@@ -6,6 +6,7 @@ import inspect
 import signal
 
 ser : serial.Serial = None
+IsShutdown = False
 
 def main():
 
@@ -22,9 +23,11 @@ def main():
     ser = serial.Serial(port=e.RS232C_DEV_RECV,baudrate=e.RS232C_BPS,timeout=e.RS232C_TIMEOUT)
 
     while True:
+        if IsShutdown == True :
+            break
         try:
             if ser.in_waiting > 0:
-                data=ser.readline().decode('utf-8').rstrip()
+                data=ser.readline().decode('utf-8',errors="ignore").rstrip()
                 log.LogOut(cur,clsLog.TYPE_LOG,f"Received:{data}")
         except Exception as e:
             log.LogOut(cur,clsLog.TYPE_ERR,f"{e}")
@@ -32,6 +35,7 @@ def main():
 def shutdown():
     if ser != None and ser.is_open == True:
         ser.close()
+    IsShutdown = True
     print("Shutdown")
     sys.exit(0)
 

@@ -511,7 +511,12 @@ class clsCommandToRS232C(clsLog,clsError):
         self.EnvData = clsEnvData()
 
         e = self.EnvData
-        self.CmmandSendSerial = serial.Serial(e.RS232C_DEV_SEND,e.RS232C_BPS,timeout=e.RS232C_TIMEOUT) 
+        try:
+            self.CmmandSendSerial = serial.Serial(e.RS232C_DEV_SEND, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
+        except serial.SerialException as e:
+            print(f"Serial error: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
 
     def Stop(self):
         '''
@@ -546,6 +551,9 @@ class clsCommandToRS232C(clsLog,clsError):
 
             while self.CmdClutchQues:
 
+                if self.IsCommandSendClutchThredStop == True:
+                    break
+
                 Cmd : clsSendCommandData = self.CmdClutchQues.pop()
 
                 if Cmd.Command == "clutch_up":
@@ -562,6 +570,9 @@ class clsCommandToRS232C(clsLog,clsError):
         '''
         コマンドをデバイスに送信する
         '''
+        QueSizeMax = 1
+        if len(self.CmdClutchQues) >= QueSizeMax:
+            self.CmdClutchQues.pop(0)
 
         # クラッチの情報送信用のスレッドを開始
         self.CommandSendClutchThredStart()
@@ -572,8 +583,6 @@ class clsCommandToRS232C(clsLog,clsError):
         elif pCmd.Command == "clutch_dw":
             # キューへコマンドを追加
             self.CmdClutchQues.append(copy.deepcopy(pCmd))
-        elif pCmd.Command == "clutch_up":
-            self.SendDevice("c_up")
         elif pCmd.Command == "accel_up":
             #アクセル アップ
             self.SendDevice("a_up")
@@ -664,7 +673,7 @@ class clsCommandToRS232C(clsLog,clsError):
         '''
         cur = inspect.currentframe().f_code.co_name
         try:
-            self.CmmandSendSerial.write(pCmd.encode('utf-8'))
+            self.CmmandSendSerial.write(f"{pCmd},".encode('utf-8'))
         except Exception as e:
             self.HandleError(cur,f"{e}")
 
@@ -677,10 +686,22 @@ class clsCommandToRS232C(clsLog,clsError):
         max = pCmd.Quantity
 
         while True:
-            cnt += 1
+
+            if self.IsCommandSendClutchThredStop == True:
+                break
+
+            cmdQues = []
+
+            for i in range(15):
+                if cnt > max:
+                    break
+                cnt += 1
+                cmdQues.append("c_up")
+
+            self.SendDevice(",".join(cmdQues))
             if cnt > max:
                 break
-            self.SendDevice("c_up")
+            time.sleep(1.5)
 
     def Clutch_DOWN(self,pCmd:clsSendCommandData):
         '''
@@ -691,10 +712,22 @@ class clsCommandToRS232C(clsLog,clsError):
         max = pCmd.Quantity
 
         while True:
-            cnt += 1
+
+            if self.IsCommandSendClutchThredStop == True:
+                break
+
+            cmdQues = []
+
+            for i in range(15):
+                if cnt > max:
+                    break
+                cnt += 1
+                cmdQues.append("c_dw")
+
+            self.SendDevice(",".join(cmdQues))
             if cnt > max:
                 break
-            self.SendDevice("c_dw")
+            time.sleep(1.5)
 
 class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     '''
@@ -834,7 +867,9 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         #コマンド送信のスレッド開始
         self.CommandSendThredEnd()
         #コマンド送信関連のスレッドの停止
+        self.LogOut("",clsLog.F_DEF,"self.CommandToDevice.Stop() Start")
         self.CommandToDevice.Stop()
+        self.LogOut("",clsLog.F_DEF,"self.CommandToDevice.Stop() End")
 
     def on_modified(self,event):
         '''
@@ -1290,8 +1325,9 @@ def shutdown():
     '''
     プログラムの終了時
     '''
+    print("Server ShatDown Start...")
     WebSocketJyosetu.RunExit()
-    print("Server ShatDown...")
+    print("Server ShatDown Finish")
     sys.exit(0)
 
 if __name__ == "__main__":
