@@ -3,6 +3,7 @@ PgName = "Jyosetu Message Server"
 
 import sys
 
+
 sys.path.append('lib')
 import asyncio
 import websockets  # type: ignore
@@ -14,6 +15,7 @@ import sqlite3
 import json
 from enum import Enum
 import os
+import os
 import time
 from watchdog.observers import Observer # type: ignore
 from watchdog.events import FileSystemEventHandler # type: ignore
@@ -24,7 +26,13 @@ import inspect
 import queue
 import RPi.GPIO as GPIO
 import subprocess
+import subprocess
 import pigpio
+import copy
+import serial
+from env import clsEnvData 
+from Log import clsLog
+from colorama import Back, Style
 import copy
 import serial
 from env import clsEnvData 
@@ -67,6 +75,7 @@ def Openning():
     print(f'Wellcome to {PgName}.')
     print('')
     print('')
+    
     
 class clsDB(clsLog,clsError):
 
@@ -306,6 +315,7 @@ class clsAutoClutchSendCommandQueueValue():
     '''
 
 class clsCommandToGPIO(clsLog):
+class clsCommandToGPIO(clsLog):
     '''
     コマンドをGOIPへ送る
     '''
@@ -328,6 +338,21 @@ class clsCommandToGPIO(clsLog):
     pi : pigpio.pi
     '''
     PGIO
+    '''
+
+    CmdClutchQues : List[clsSendCommandData] = []
+    '''
+    クラッチのキュー
+    '''
+
+    IsCommandSendClutchThredStop : bool = False
+    '''
+    スレッドの実行をストップするフラグ
+    '''
+
+    CommandSendClutchThred : threading.Thread = None
+    '''
+    クラッチコマンドを送信するスレッド
     '''
 
     CmdClutchQues : List[clsSendCommandData] = []
@@ -396,6 +421,50 @@ class clsCommandToGPIO(clsLog):
                 else:
                     pass
 
+
+    def Stop(self):
+        '''
+        スレッドを停止する
+        '''
+        self.CommandSendClutchThredStop()
+
+    def CommandSendClutchThredStart(self):
+        '''
+        クラッチのスレッドを開始する
+        '''
+        self.IsCommandSendClutchThredStop == False
+        if self.CommandSendClutchThred == None:
+            self.CommandSendClutchThred = threading.Thread(target=self.SendCommandClutch)
+            self.CommandSendClutchThred.start()
+
+    def CommandSendClutchThredStop(self):
+        '''
+        クラッチのスレッドを止める
+        '''
+        self.IsCommandSendClutchThredStop = True
+        if self.CommandSendClutchThred != None:
+            self.CommandSendClutchThred.join()
+            self.CommandSendClutchThred = None
+
+    def SendCommandClutch(self):
+        '''
+        クラッチのスレッドを開始する
+        '''
+        while self.IsCommandSendClutchThredStop == False:
+
+            while self.CmdClutchQues:
+
+                Cmd : clsSendCommandData = self.CmdClutchQues.pop()
+
+                if Cmd.Command == "clutch_up":
+                    self.Clutch_UP(Cmd)
+                    pass
+                elif Cmd.Command == "clutch_dw":
+                    self.Clutch_DOWN(Cmd)
+                    pass
+                else:
+                    pass
+
     
     def Send(self,pCmd:clsSendCommandData):
         '''
@@ -405,10 +474,18 @@ class clsCommandToGPIO(clsLog):
         # クラッチの情報送信用のスレッドを開始
         self.CommandSendClutchThredStart()
 
+
+        # クラッチの情報送信用のスレッドを開始
+        self.CommandSendClutchThredStart()
+
         if pCmd.Command == "clutch_up":
             # キューへコマンドを追加
             self.CmdClutchQues.append(copy.deepcopy(pCmd))
+            # キューへコマンドを追加
+            self.CmdClutchQues.append(copy.deepcopy(pCmd))
         elif pCmd.Command == "clutch_dw":
+            # キューへコマンドを追加
+            self.CmdClutchQues.append(copy.deepcopy(pCmd))
             # キューへコマンドを追加
             self.CmdClutchQues.append(copy.deepcopy(pCmd))
         else:
@@ -420,7 +497,13 @@ class clsCommandToGPIO(clsLog):
         '''
         cur = inspect.currentframe().f_code.co_name
 
+        cur = inspect.currentframe().f_code.co_name
+
         pulse_width = (angle / 180) * (2500 - 500) + 500
+        if self.pi.connected == True:
+            self.pi.set_servo_pulsewidth(self.EnvData.GP_NO_clutch_up_down,pulse_width)
+        else:
+            self.LogOut(cur,clsLog.TYPE_WAR,f"pigpiodのサーバが起動していないためサーボモーターを制御できません。sudo pigpiod でデーモンを起動してください。")
         if self.pi.connected == True:
             self.pi.set_servo_pulsewidth(self.EnvData.GP_NO_clutch_up_down,pulse_width)
         else:
@@ -441,10 +524,13 @@ class clsCommandToGPIO(clsLog):
             if cnt > max:
                 break
             self.clutch_angle += 10
+            self.clutch_angle += 10
             if self.clutch_angle <= 180:
                 self.ServoSetAngle(self.clutch_angle)
                 #print(self.clutch_angle)
+                #print(self.clutch_angle)
                 #time.sleep(0.3)
+                pass
                 pass
             else:
                 self.clutch_angle = 180
@@ -465,10 +551,13 @@ class clsCommandToGPIO(clsLog):
             if cnt > max:
                 break
             self.clutch_angle -= 10
+            self.clutch_angle -= 10
             if self.clutch_angle >= 0:
                 self.ServoSetAngle(self.clutch_angle)
                 #print(self.clutch_angle)
+                #print(self.clutch_angle)
                 #time.sleep(0.3)
+                pass
                 pass
             else:
                 self.clutch_angle = 0
@@ -740,6 +829,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     '''
 
     DbObserver : Observer = None # type: ignore
+    DbObserver : Observer = None # type: ignore
     '''
     DBファイル更新の監視
     '''
@@ -821,6 +911,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
     #CommandToDevice : clsCommandToGPIO
     CommandToDevice : clsCommandToRS232C
+    #CommandToDevice : clsCommandToGPIO
+    CommandToDevice : clsCommandToRS232C
     '''
     コマンドをデバイスに送信
     '''
@@ -831,6 +923,8 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         super().__init__()
         self.JyosetuDB = pDb
+        #self.CommandToDevice = clsCommandToGPIO()
+        self.CommandToDevice = clsCommandToRS232C()
         #self.CommandToDevice = clsCommandToGPIO()
         self.CommandToDevice = clsCommandToRS232C()
         #self.CommandSendQueue = queue.Queue()
@@ -1187,6 +1281,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         クラッチのコマンドを送り続ける コマンド送信
         '''
         SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=self.JyosetuDB.EnvData.AUTO_CL_QUANTITY)
+        SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=self.JyosetuDB.EnvData.AUTO_CL_QUANTITY)
         while self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == False:
             self.SendCommand(SendCommand)
             time.sleep(1.0)
@@ -1228,6 +1323,11 @@ class clsWebSocketJyosetu(clsLog,clsError):
         サーバの開始
         '''
         cur = inspect.currentframe().f_code.co_name
+
+        #pigpioのデーモンを起動
+        subprocess.Popen(['sudo','pigpiod'])
+
+        time.sleep(2)
 
         #pigpioのデーモンを起動
         subprocess.Popen(['sudo','pigpiod'])
