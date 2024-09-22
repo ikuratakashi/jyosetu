@@ -11,7 +11,7 @@
 
 websockets
 webrtc_logs*
-/tmp/*.pid
+*.pid
 *.pyc
 
 # 設定が終わったら、以下のコマンドの様に実行してキャッシュをクリアしてください
