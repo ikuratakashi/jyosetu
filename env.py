@@ -18,8 +18,11 @@ class clsEnvData:
     TYPE_OPERATION : str = ""
     TYPE_SOUND : str = ""
     TYPE_AUTO : str = ""
+
     WS_PING_TNTERVAL:int = 20
     WS_PING_TIMEOUT:int = 20
+    WS_LOG_COMMAND_SEND_DEVICE:int = 1
+
     DB_COM_BEFTIME:int = 30
 
     GP_NO_clutch_up_down:int = 2 
@@ -54,6 +57,7 @@ class clsEnvData:
         self.TYPE_SOUND = os.getenv('TYPE_SOUND')
         self.TYPE_AUTO = os.getenv('TYPE_AUTO')
 
+        #WebSocket関係
         try:
             self.WS_PING_TIMEOUT = int(os.getenv('WS_PING_INTERVAL'))
         except:
@@ -66,6 +70,11 @@ class clsEnvData:
             self.DB_COM_BEFTIME = int(os.getenv('DB_COM_BEFTIME'))
         except:
             pass
+        try:
+            self.WS_LOG_COMMAND_SEND_DEVICE = int(os.getenv('WS_LOG_COMMAND_SEND_DEVICE'))
+        except:
+            pass
+        
 
         #GOPI関連
         try:

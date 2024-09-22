@@ -90,7 +90,7 @@ class clsLog:
             Error
             '''
             print(f"{self.F_ERR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        if pType == self.TYPE_WAR:
+        elif pType == self.TYPE_WAR:
             '''
             ワーニング
             '''
