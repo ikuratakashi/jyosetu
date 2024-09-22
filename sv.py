@@ -509,14 +509,46 @@ class clsCommandToRS232C(clsLog,clsError):
         コンストラクタ
         '''
         self.EnvData = clsEnvData()
+        self.SerialOpen()
 
+    def SerialOpen(self,pDev:str = "") -> bool:
+        '''
+        シリアル通信を開く
+        戻り値：オープンの成功:True／失敗:False
+        '''
+        cur = inspect.currentframe().f_code.co_name
         e = self.EnvData
+        IsError = False
+        Result = True
+        if pDev == "":
+            SelDev = e.RS232C_DEV_SEND
+        else:
+            SelDev = pDev
+
         try:
-            self.CmmandSendSerial = serial.Serial(e.RS232C_DEV_SEND, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
+            self.CmmandSendSerial = serial.Serial(SelDev, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
+            self.LogOut(cur,clsLog.TYPE_LOG,f"Serial Open Device:{Back.GREEN} {self.EnvData.RS232C_DEV_SEND} {Back.RESET}")
         except serial.SerialException as e:
-            print(f"Serial error: {e}")
+            self.LogOut(cur,clsLog.TYPE_ERR,f"Serial error:{e}")
+            IsError = True
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            self.LogOut(cur,clsLog.TYPE_ERR,f"Unexpected error:{e}")
+            IsError = True
+
+        if IsError == True:
+            Result = False
+            res = subprocess.run(['sudo ls /dev/ttyUSB*'],shell=True,executable='/bin/bash',capture_output=True, text=True)
+            Devices = res.stdout.split('\n')
+            for Device in Devices:
+                if Device != "":
+                    IsOpen = self.SerialOpen(Device)
+                    if IsOpen == True:
+                        Result = True
+                        self.LogOut(cur,clsLog.TYPE_ERR,f"CommandSend Serial No Open Device:{Back.YELLOW} {self.EnvData.RS232C_DEV_SEND} {Back.RESET}")
+                        self.LogOut(cur,clsLog.TYPE_WAR,f"CommandSend Serial Re Open Device:{Back.WHITE} {Device} {Back.RESET}")
+                        break
+        
+        return Result
 
     def Stop(self):
         '''
@@ -676,13 +708,24 @@ class clsCommandToRS232C(clsLog,clsError):
 
             Cmds = []
             max = pCnt
-            for i in max:
+            for i in range(max):
                 Cmds.append(pCmd)
 
-            self.CmmandSendSerial.write(f"{",".join(Cmds)},".encode('utf-8'))
+            if self.CmmandSendSerial == None :
+                self.SerialOpen()
+
+            if self.CmmandSendSerial != None :
+                if self.CmmandSendSerial.is_open == False:
+                    self.CmmandSendSerial.open()
+                if self.CmmandSendSerial.is_open == True:
+                    self.CmmandSendSerial.write(f"{','.join(Cmds)},".encode('utf-8'))
+                else:
+                    self.LogOut(cur,clsLog.TYPE_WAR,f"Serial Closed Device:{self.EnvData.RS232C_DEV_SEND}")
 
         except Exception as e:
+            self.LogOut(cur,clsLog.TYPE_WAR,f"Serial Closed Device:{self.EnvData.RS232C_DEV_SEND}")
             self.HandleError(cur,f"{e}")
+            self.SerialOpen()
 
     def Clutch_UP(self,pCmd:clsSendCommandData):
         '''
@@ -1038,10 +1081,11 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         cur = inspect.currentframe().f_code.co_name
         env = self.JyosetuDB.EnvData
-        if pCommand.Type == env.TYPE_AUTO:
-            self.LogOut(cur,clsLog.TYPE_SENDCOMMAND_AUTO,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
-        else:
-            self.LogOut(cur,clsLog.TYPE_SENDCOMMAND,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+        if env.WS_LOG_COMMAND_SEND_DEVICE == 1:
+            if pCommand.Type == env.TYPE_AUTO:
+                self.LogOut(cur,clsLog.TYPE_SENDCOMMAND_AUTO,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+            else:
+                self.LogOut(cur,clsLog.TYPE_SENDCOMMAND,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
 
         self.CommandToDevice.Send(pCommand)
 
