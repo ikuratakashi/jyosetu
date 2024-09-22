@@ -164,3 +164,19 @@ vimエディターはwindowsなどのメモ帳になれてしまうと、ちょ�
 
 # ラズパイ(bash)コマンド
 
+# ラズパイへVNCでアクセスするためのTips
+
+## ラズパイのPC名を使ってVNC経由でアクセスするには
+
+1. Windowsへ Apple.Bonjour をインストール
+
+```
+winget install Apple.Bonjour
+```
+
+2. VNCでアクセスする際にPC名の後ろに .local を設定する
+
+例）PC名が jyosetu の場合
+```
+jyosetu.local
+```

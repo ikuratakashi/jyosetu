@@ -585,70 +585,70 @@ class clsCommandToRS232C(clsLog,clsError):
             self.CmdClutchQues.append(copy.deepcopy(pCmd))
         elif pCmd.Command == "accel_up":
             #アクセル アップ
-            self.SendDevice("a_up")
+            self.SendDevice("a_up",pCmd.Quantity)
         elif pCmd.Command == "accel_dw":
             #アクセル ダウン
-            self.SendDevice("a_dw")
+            self.SendDevice("a_dw",pCmd.Quantity)
         elif pCmd.Command == "move_fw":
             #移動 前進
             self.SendDevice("m_fw")
         elif pCmd.Command == "move_bk":
             #移動 後進
-            self.SendDevice("m_bk")
+            self.SendDevice("m_bk",pCmd.Quantity)
         elif pCmd.Command == "move_right":
             #移動 右
-            self.SendDevice("m_r")
+            self.SendDevice("m_r",pCmd.Quantity)
         elif pCmd.Command == "move_left":
             #移動 左
-            self.SendDevice("m_l")
+            self.SendDevice("m_l",pCmd.Quantity)
         elif pCmd.Command == "chute_L_lup":
             #雪射出口 左上向き
-            self.SendDevice("c_L_lup")
+            self.SendDevice("c_L_lup",pCmd.Quantity)
         elif pCmd.Command == "chute_L_up":
             #雪射出口 上向き
-            self.SendDevice("c_L_up")
+            self.SendDevice("c_L_up",pCmd.Quantity)
         elif pCmd.Command == "chute_L_rup":
             #雪射出口 右上向き
-            self.SendDevice("c_L_rup")
+            self.SendDevice("c_L_rup",pCmd.Quantity)
         elif pCmd.Command == "chute_L_right":
             #雪射出口 右向き
-            self.SendDevice("c_L_right")
+            self.SendDevice("c_L_right",pCmd.Quantity)
         elif pCmd.Command == "chute_L_rdw":
             #雪射出口 右下向き
-            self.SendDevice("c_L_rdw")
+            self.SendDevice("c_L_rdw",pCmd.Quantity)
         elif pCmd.Command == "chute_L_dw":
             #雪射出口 下向き
-            self.SendDevice("c_L_dw")
+            self.SendDevice("c_L_dw",pCmd.Quantity)
         elif pCmd.Command == "chute_L_ldw":
             #雪射出口 左下向き
-            self.SendDevice("c_L_ldw")
+            self.SendDevice("c_L_ldw",pCmd.Quantity)
         elif pCmd.Command == "chute_L_left":
             #雪射出口 左向き
-            self.SendDevice("c_L_left")
+            self.SendDevice("c_L_left",pCmd.Quantity)
         elif pCmd.Command == "chute_R_lup":
             #雪射出口 スティック右 左上向き
-            self.SendDevice("c_R_lup")
+            self.SendDevice("c_R_lup",pCmd.Quantity)
         elif pCmd.Command == "chute_R_up":
             #雪射出口 上向き
-            self.SendDevice("c_R_up")
+            self.SendDevice("c_R_up",pCmd.Quantity)
         elif pCmd.Command == "chute_R_rup":
             #雪射出口 右上向き
-            self.SendDevice("c_R_rup")
+            self.SendDevice("c_R_rup",pCmd.Quantity)
         elif pCmd.Command == "chute_R_right":
             #雪射出口 右向き
-            self.SendDevice("c_R_right")
+            self.SendDevice("c_R_right",pCmd.Quantity)
         elif pCmd.Command == "chute_R_rdw":
             #雪射出口 右下向き
-            self.SendDevice("c_R_rdw")
+            self.SendDevice("c_R_rdw",pCmd.Quantity)
         elif pCmd.Command == "chute_R_dw":
             #雪射出口 下向き
-            self.SendDevice("c_R_dw")
+            self.SendDevice("c_R_dw",pCmd.Quantity)
         elif pCmd.Command == "chute_R_ldw":
             #雪射出口 左下向き
-            self.SendDevice("c_R_ldw")
+            self.SendDevice("c_R_ldw",pCmd.Quantity)
         elif pCmd.Command == "chute_R_left":
             #雪射出口 左向き
-            self.SendDevice("c_R_left")
+            self.SendDevice("c_R_left",pCmd.Quantity)
         elif pCmd.Command == "btn_sankaku":
             #未設定ボタン△
             self.SendDevice("btn_sankaku")
@@ -660,20 +660,27 @@ class clsCommandToRS232C(clsLog,clsError):
             self.SendDevice("on")
         elif pCmd.Command == "btn_off":
             #歯の回転のOFF
-            self.SendDevice("off")
+            self.SendDevice("off",5)
         elif pCmd.Command == "btn_em":
             #緊急停止
-            self.SendDevice("em")
+            self.SendDevice("em",5)
         else:
             pass
     
-    def SendDevice(self,pCmd:str):
+    def SendDevice(self,pCmd:str,pCnt:int = 1):
         '''
         デバイスへコマンドを送信する
         '''
         cur = inspect.currentframe().f_code.co_name
         try:
-            self.CmmandSendSerial.write(f"{pCmd},".encode('utf-8'))
+
+            Cmds = []
+            max = pCnt
+            for i in max:
+                Cmds.append(pCmd)
+
+            self.CmmandSendSerial.write(f"{",".join(Cmds)},".encode('utf-8'))
+
         except Exception as e:
             self.HandleError(cur,f"{e}")
 
