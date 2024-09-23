@@ -33,6 +33,11 @@ class clsLog:
     ログタイプ:ステータス
     '''
 
+    TYPE_RS232C : str = "RS232C"
+    '''
+    ログタイプ:RS232C
+    '''
+
     TYPE_SENDCOMMAND : str = "SEND_CMD"
     '''
     ログタイプ:送信コマンド
@@ -139,6 +144,13 @@ class clsLog:
             ステータス
             '''
             if self.EnvData.WS_LOG_STATUS_STDOUT == 1:
+                PrintStr = f"{clsLog.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+                print(PrintStr)
+        elif pType == clsLog.TYPE_RS232C:
+            '''
+            RS232Cのログ
+            '''
+            if self.EnvData.WS_LOG_RS232C_STDOUT == 1:
                 PrintStr = f"{clsLog.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
                 print(PrintStr)
         else:

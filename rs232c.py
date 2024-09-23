@@ -31,7 +31,7 @@ def SerialOpen(pDev:str = "") -> bool:
 
     try:
         CmmandSendSerial = serial.Serial(SelDev, EnvData.RS232C_BPS, timeout=EnvData.RS232C_TIMEOUT,xonxoff=True)
-        Log.LogOut(cur,clsLog.TYPE_LOG,f"Serial Open Device:{Back.GREEN} {EnvData.RS232C_DEV_RECV} {Back.RESET}")
+        Log.LogOut(cur,clsLog.TYPE_RS232C,f"Serial Open Device:{Back.GREEN} {EnvData.RS232C_DEV_RECV} {Back.RESET}")
     except serial.SerialException as e:
         Log.LogOut(cur,clsLog.TYPE_ERR,f"Serial error:{e}")
         IsError = True
@@ -79,7 +79,8 @@ def main():
         if IsShutdown == True :
             break
         try:
-            if CmmandSendSerial.in_waiting > 0:
+            #if CmmandSendSerial.in_waiting > 0:
+            if True:
                 data_raw=CmmandSendSerial.readline().decode('utf-8',errors="ignore").rstrip()
                 data_list=data_raw.split(",")
                 data_show=[]
@@ -92,7 +93,7 @@ def main():
 
                     data_show.append(data)
 
-                log.LogOut(cur,clsLog.TYPE_LOG,f"Received:{','.join(data_show)}")
+                log.LogOut(cur,clsLog.TYPE_RS232C,f"Received:{','.join(data_show)}")
         except Exception as e:
             log.LogOut(cur,clsLog.TYPE_WAR,f"Serial Closed Device:{EnvData.RS232C_DEV_RECV}")
             log.LogOut(cur,clsLog.TYPE_ERR,f"{e}")
