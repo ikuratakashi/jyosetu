@@ -2,11 +2,11 @@
 
 cd /home/jyosetu/jyosetu
 
-/usr/bin/python ./sv.py &
+sudo /usr/bin/python ./sv.py &
 echo 通信サーバ プロセスID：$!
 echo $! > ./tmp/websocket.pid
 
-#/usr/bin/python ./rs232c.py &
+#sudo /usr/bin/python ./rs232c.py &
 #echo RS232C確認 プロセスID：$!
 #echo $! > ./tmp/rs232c.pid
 

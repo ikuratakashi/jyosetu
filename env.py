@@ -21,7 +21,9 @@ class clsEnvData:
 
     WS_PING_TNTERVAL:int = 20
     WS_PING_TIMEOUT:int = 20
-    WS_LOG_COMMAND_SEND_DEVICE:int = 1
+    WS_LOG_COMMAND_SEND_DEVICE_STDOUT:int = 1
+    WS_LOG_ETC_STDOUT:int = 1
+    WS_LOG_FILE_OUT:int = 0
 
     DB_COM_BEFTIME:int = 30
 
@@ -71,9 +73,22 @@ class clsEnvData:
         except:
             pass
         try:
-            self.WS_LOG_COMMAND_SEND_DEVICE = int(os.getenv('WS_LOG_COMMAND_SEND_DEVICE'))
+            self.WS_LOG_COMMAND_SEND_DEVICE_STDOUT = int(os.getenv('WS_LOG_COMMAND_SEND_DEVICE_STDOUT'))
         except:
             pass
+        try:
+            self.WS_LOG_ETC_STDOUT = int(os.getenv('WS_LOG_ETC_STDOUT'))
+        except:
+            pass
+        try:
+            self.WS_LOG_FILE_OUT = int(os.getenv('WS_LOG_FILE_OUT'))
+        except:
+            pass
+        try:
+            self.WS_LOG_STATUS_STDOUT = int(os.getenv('WS_LOG_STATUS_STDOUT'))
+        except:
+            pass
+        
         
 
         #GOPI関連

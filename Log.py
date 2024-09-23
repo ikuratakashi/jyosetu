@@ -2,10 +2,15 @@ import sys
 sys.path.append('lib')
 from colorama import init, Fore, Back, Style # type: ignore
 from datetime import datetime,timedelta
+from env import clsEnvData
 
 class clsLog:
     '''
     ログ出力
+    '''
+    EnvData : clsEnvData
+    '''
+    設定ファイル
     '''
 
     TYPE_ERR : str = "ERROR"
@@ -21,6 +26,11 @@ class clsLog:
     TYPE_LOG : str = "LOG"
     '''
     ログタイプ:Log
+    '''
+
+    TYPE_STATUS : str = "STATUS"
+    '''
+    ログタイプ:ステータス
     '''
 
     TYPE_SENDCOMMAND : str = "SEND_CMD"
@@ -77,6 +87,11 @@ class clsLog:
     '''
     リセット
     '''
+    def __init__(self):
+        '''
+        コンストラクタ
+        '''
+        self.EnvData = clsEnvData()
 
     def LogOut(self,pCur:str,pType:str,pMessage:str):
         '''
@@ -84,35 +99,52 @@ class clsLog:
         '''
         now = datetime.now()
         now_time = now.strftime('%y-%m-%d %H:%M:%S:%f')[:-3]
+        PrintStr = ""
 
-        if pType == self.TYPE_ERR:
+        if pType == clsLog.TYPE_ERR:
             '''
             Error
             '''
-            print(f"{self.F_ERR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        elif pType == self.TYPE_WAR:
+            PrintStr = f"{clsLog.F_ERR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+            print(PrintStr)
+        elif pType == clsLog.TYPE_WAR:
             '''
             ワーニング
             '''
-            print(f"{self.F_WAR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-
-        elif pType == self.TYPE_SENDCOMMAND:
+            PrintStr = f"{clsLog.F_WAR}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+            print(PrintStr)
+        elif pType == clsLog.TYPE_SENDCOMMAND:
             '''
             送信コマンド
             '''
-            print(f"{self.F_SEND_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        elif pType == self.TYPE_SENDCOMMAND_AUTO:
+            if self.EnvData.WS_LOG_COMMAND_SEND_DEVICE_STDOUT == 1:
+                PrintStr = f"{clsLog.F_SEND_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+                print(PrintStr)
+        elif pType == clsLog.TYPE_SENDCOMMAND_AUTO:
             '''
             送信コマンド自動
             '''
-            print(f"{self.F_SEND_A_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
-        elif pType == self.TYPE_SAVECOMMAND:
+            if self.EnvData.WS_LOG_COMMAND_SEND_DEVICE_STDOUT == 1:
+                PrintStr = f"{clsLog.F_SEND_A_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+                print(PrintStr)
+        elif pType == clsLog.TYPE_SAVECOMMAND:
             '''
             コマンド保存
             '''
-            print(f"{self.F_SAVE_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
+            if self.EnvData.WS_LOG_ETC_STDOUT == 1:
+                PrintStr = f"{clsLog.F_SAVE_CMD}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+                print(PrintStr)
+        elif pType == clsLog.TYPE_STATUS:
+            '''
+            ステータス
+            '''
+            if self.EnvData.WS_LOG_STATUS_STDOUT == 1:
+                PrintStr = f"{clsLog.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+                print(PrintStr)
         else:
             '''
             通常ログ
             '''
-            print(f"{self.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{self.R}")
+            if self.EnvData.WS_LOG_ETC_STDOUT == 1:
+                PrintStr = f"{clsLog.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+                print(PrintStr)

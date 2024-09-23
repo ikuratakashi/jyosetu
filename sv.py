@@ -34,6 +34,54 @@ from colorama import Back, Style
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
 
+class clsActLed():
+    '''
+    ラズパイのACT LEDの点滅
+    '''
+
+    LedOnOff : bool = False
+    '''
+    LEDの点灯／消灯状態
+    '''
+
+    def Init(self):
+        '''
+        デフォルトの点灯を無効に
+        '''
+        #os.system('sudo sh -c echo none > /sys/class/leds/ACT/trigger')
+        os.system('echo none | sudo tee /sys/class/leds/ACT/trigger >/dev/null 2>&1')
+    def On(self):
+        '''
+        点灯
+        '''
+        #os.system('sudo sh -c echo 1 > /sys/class/leds/ACT/brightness')
+        os.system('echo 1 | sudo tee /sys/class/leds/ACT/brightness >/dev/null 2>&1')
+        self.LedOnOff = True
+        
+    def Off(self):
+        '''
+        消灯
+        '''
+        #os.system('sudo sh -c echo 0 > /sys/class/leds/ACT/brightness')
+        os.system('echo 0 | sudo tee /sys/class/leds/ACT/brightness >/dev/null 2>&1')
+        self.LedOnOff = False
+    
+    def AutoOnOff(self):
+        '''
+        自動点灯／消灯
+        '''
+        thread = threading.Thread(target=self.AutoOnOffThred)
+        thread.daemon = True
+        thread.start()
+
+    def AutoOnOffThred(self):
+        '''
+        自動点灯／消灯 スレッド
+        '''
+        self.On()
+        time.sleep(0.1)
+        self.Off()
+
 class clsError:
     '''
     エラー処理
@@ -504,11 +552,19 @@ class clsCommandToRS232C(clsLog,clsError):
     コマンドを送るシリアルポート
     '''
 
+    ActLed : clsActLed = clsActLed()
+    '''
+    ACT LEDの点灯／消灯
+    '''
+
     def __init__(self):
         '''
         コンストラクタ
         '''
         self.EnvData = clsEnvData()
+        self.ActLed : clsActLed = clsActLed()
+        self.ActLed.Init()
+
         self.SerialOpen()
 
     def SerialOpen(self,pDev:str = "") -> bool:
@@ -527,7 +583,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
         try:
             self.CmmandSendSerial = serial.Serial(SelDev, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
-            self.LogOut(cur,clsLog.TYPE_LOG,f"Serial Open Device:{Back.GREEN} {self.EnvData.RS232C_DEV_SEND} {Back.RESET}")
+            self.LogOut(cur,clsLog.TYPE_STATUS,f"Serial Open Device:{Back.GREEN} {self.EnvData.RS232C_DEV_SEND} {Back.RESET}")
         except serial.SerialException as e:
             self.LogOut(cur,clsLog.TYPE_ERR,f"Serial error:{e}")
             IsError = True
@@ -719,6 +775,7 @@ class clsCommandToRS232C(clsLog,clsError):
                     self.CmmandSendSerial.open()
                 if self.CmmandSendSerial.is_open == True:
                     self.CmmandSendSerial.write(f"{','.join(Cmds)},".encode('utf-8'))
+                    self.ActLed.AutoOnOff()
                 else:
                     self.LogOut(cur,clsLog.TYPE_WAR,f"Serial Closed Device:{self.EnvData.RS232C_DEV_SEND}")
 
@@ -917,9 +974,9 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         #コマンド送信のスレッド開始
         self.CommandSendThredEnd()
         #コマンド送信関連のスレッドの停止
-        self.LogOut("",clsLog.F_DEF,"self.CommandToDevice.Stop() Start")
+        self.LogOut("Stop",clsLog.F_DEF,"self.CommandToDevice.Stop() Start")
         self.CommandToDevice.Stop()
-        self.LogOut("",clsLog.F_DEF,"self.CommandToDevice.Stop() End")
+        self.LogOut("Stop",clsLog.F_DEF,"self.CommandToDevice.Stop() End")
 
     def on_modified(self,event):
         '''
@@ -1065,7 +1122,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
             if self.CommandSendQueueValue.BefCommandSendTime != None:
                 sec = (Now - self.CommandSendQueueValue.BefCommandSendTime).total_seconds()
-                #self.LogOut(cur,clsLog.TYPE_LOG,f"前回の何かしらのボタンダウン送信から {sec}秒 ")
+                self.LogOut(cur,clsLog.TYPE_LOG,f"前回の何かしらのボタンダウン送信から {sec}秒 ")
                 if sec > 2 :
                     IsStart = True
 
@@ -1081,11 +1138,10 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         cur = inspect.currentframe().f_code.co_name
         env = self.JyosetuDB.EnvData
-        if env.WS_LOG_COMMAND_SEND_DEVICE == 1:
-            if pCommand.Type == env.TYPE_AUTO:
-                self.LogOut(cur,clsLog.TYPE_SENDCOMMAND_AUTO,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
-            else:
-                self.LogOut(cur,clsLog.TYPE_SENDCOMMAND,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+        if pCommand.Type == env.TYPE_AUTO:
+            self.LogOut(cur,clsLog.TYPE_SENDCOMMAND_AUTO,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+        else:
+            self.LogOut(cur,clsLog.TYPE_SENDCOMMAND,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
 
         self.CommandToDevice.Send(pCommand)
 
@@ -1281,7 +1337,7 @@ class clsWebSocketJyosetu(clsLog,clsError):
         cur = inspect.currentframe().f_code.co_name
 
         #pigpioのデーモンを起動
-        subprocess.Popen(['sudo','pigpiod'])
+        #subprocess.Popen(['sudo','pigpiod'])
 
         time.sleep(2)
 
@@ -1306,7 +1362,8 @@ class clsWebSocketJyosetu(clsLog,clsError):
         # ホスト名とIPアドレスの取得
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
-        print(f"WebSocket server is running on ws://{ip_address}:{port} or ws://{hostname}:{port}")
+        print("")
+        self.LogOut(cur,clsLog.TYPE_STATUS,f"WebSocket server is running on {Back.GREEN}ws://{ip_address}:{port}{Back.RESET} or {Back.GREEN}ws://{hostname}:{port}{Back.RESET}")
 
         await self.WebSocketServer.wait_closed()
 
@@ -1376,9 +1433,11 @@ def shutdown():
     '''
     プログラムの終了時
     '''
-    print("Server ShatDown Start...")
+    cur = inspect.currentframe().f_code.co_name
+    Log = clsLog()
+    Log.LogOut(cur,clsLog.TYPE_STATUS,f"Server ShatDown Start...")
     WebSocketJyosetu.RunExit()
-    print("Server ShatDown Finish")
+    Log.LogOut(cur,clsLog.TYPE_STATUS,f"Server ShatDown Finish.")
     sys.exit(0)
 
 if __name__ == "__main__":
