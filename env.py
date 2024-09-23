@@ -24,6 +24,7 @@ class clsEnvData:
     WS_LOG_COMMAND_SEND_DEVICE_STDOUT:int = 1
     WS_LOG_ETC_STDOUT:int = 1
     WS_LOG_FILE_OUT:int = 0
+    WS_LOG_RS232C_STDOUT:int = 0
 
     DB_COM_BEFTIME:int = 30
 
@@ -88,8 +89,10 @@ class clsEnvData:
             self.WS_LOG_STATUS_STDOUT = int(os.getenv('WS_LOG_STATUS_STDOUT'))
         except:
             pass
-        
-        
+        try:
+            self.WS_LOG_RS232C_STDOUT = int(os.getenv('WS_LOG_RS232C_STDOUT'))
+        except:
+            pass
 
         #GOPI関連
         try:
