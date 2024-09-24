@@ -30,6 +30,7 @@ import serial
 from env import clsEnvData 
 from Log import clsLog
 from colorama import Back, Style
+import usbdev
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
@@ -532,6 +533,11 @@ class clsCommandToRS232C(clsLog,clsError):
     環境設定ファイル
     '''
 
+    UsbDevice : usbdev.clsUsbDevice 
+    '''
+    USBデバイス
+    '''
+
     CmdClutchQues : List[clsSendCommandData] = []
     '''
     クラッチのキュー
@@ -565,7 +571,11 @@ class clsCommandToRS232C(clsLog,clsError):
         self.ActLed : clsActLed = clsActLed()
         self.ActLed.Init()
 
+        self.UsbDevice = usbdev.clsUsbDevice()
+        self.UsbDevice.SearchUsbList()
+
         self.SerialOpen()
+
 
     def SerialOpen(self,pDev:str = "") -> bool:
         '''
@@ -576,14 +586,15 @@ class clsCommandToRS232C(clsLog,clsError):
         e = self.EnvData
         IsError = False
         Result = True
-        if pDev == "":
-            SelDev = e.RS232C_DEV_SEND
+        SelDev = "none"
+        if pDev == "" and len(self.UsbDevice.UsbSirialList) > 0:
+            SelDev = self.UsbDevice.UsbSirialList[0].Name
         else:
             SelDev = pDev
 
         try:
             self.CmmandSendSerial = serial.Serial(SelDev, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
-            self.LogOut(cur,clsLog.TYPE_STATUS,f"Serial Open Device:{Back.GREEN} {self.EnvData.RS232C_DEV_SEND} {Back.RESET}")
+            self.LogOut(cur,clsLog.TYPE_STATUS,f"Serial Open Device:{Back.GREEN}{SelDev}{Back.RESET}")
         except serial.SerialException as e:
             self.LogOut(cur,clsLog.TYPE_ERR,f"Serial error:{e}")
             IsError = True
@@ -593,15 +604,13 @@ class clsCommandToRS232C(clsLog,clsError):
 
         if IsError == True:
             Result = False
-            res = subprocess.run(['sudo ls /dev/ttyUSB*'],shell=True,executable='/bin/bash',capture_output=True, text=True)
-            Devices = res.stdout.split('\n')
-            for Device in Devices:
-                if Device != "":
-                    IsOpen = self.SerialOpen(Device)
+            if pDev == "":
+                for Device in self.UsbDevice.UsbSirialList:
+                    IsOpen = self.SerialOpen(Device.Name)
                     if IsOpen == True:
                         Result = True
-                        self.LogOut(cur,clsLog.TYPE_ERR,f"CommandSend Serial No Open Device:{Back.YELLOW} {self.EnvData.RS232C_DEV_SEND} {Back.RESET}")
-                        self.LogOut(cur,clsLog.TYPE_WAR,f"CommandSend Serial Re Open Device:{Back.WHITE} {Device} {Back.RESET}")
+                        self.LogOut(cur,clsLog.TYPE_ERR,f"CommandSend Serial No Open Device:{Back.YELLOW} {Device.Name} {Back.RESET}")
+                        self.LogOut(cur,clsLog.TYPE_WAR,f"CommandSend Serial Re Open Device:{Back.WHITE} {Device.Name} {Back.RESET}")
                         break
         
         return Result
