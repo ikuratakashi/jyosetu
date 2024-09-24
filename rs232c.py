@@ -7,7 +7,9 @@ import signal
 from colorama import init, Fore, Back, Style
 import subprocess
 import time
+import usbdev
 
+UsbDevice : usbdev.clsUsbDevice  = None
 CmmandSendSerial : serial.Serial = None
 IsShutdown = False
 
@@ -23,9 +25,14 @@ def SerialOpen(pDev:str = "") -> bool:
     Log = clsLog()
 
     global CmmandSendSerial
+    global UsbDevice
 
-    if pDev == "":
-        SelDev = EnvData.RS232C_DEV_RECV
+    UsbDevice = usbdev.clsUsbDevice()
+    UsbDevice.SearchUsbList()
+    SelDev = ""
+
+    if pDev == "" and len(UsbDevice.UsbSirialList) > 0:
+        SelDev = UsbDevice.UsbSirialList[len(UsbDevice.UsbSirialList)-1].Name
     else:
         SelDev = pDev
 
@@ -41,16 +48,10 @@ def SerialOpen(pDev:str = "") -> bool:
 
     if IsError == True:
         Result = False
-        res = subprocess.run(['sudo ls /dev/ttyUSB*'],shell=True,executable='/bin/bash',capture_output=True, text=True)
-        DevicesTmp = res.stdout.split('\n')
-        Devices = []
-        for DeviceTmp in DevicesTmp:
-            if DeviceTmp != "":
-                Devices.append(DeviceTmp)
-        if len(Devices) >=2: 
-            for Device in Devices[::-1]:
-                if Device != "":
-                    IsOpen = SerialOpen(Device)
+        if pDev == "" :
+            if len(UsbDevice.UsbSirialList) > 0:
+                for Device in UsbDevice.UsbSirialList[::-1]:
+                    IsOpen = SerialOpen(Device.Name)
                     if IsOpen == True:
                         Result = True
                         Log.LogOut(cur,clsLog.TYPE_ERR,f"CommandSend Serial No Open Device:{Back.YELLOW} {EnvData.RS232C_DEV_RECV} {Back.RESET}")
