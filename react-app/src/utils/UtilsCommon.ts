@@ -41,6 +41,14 @@ export enum enmButtonType{
     */
     clutch_dw   = 'clutch_dw', 
     /**
+    * AUTOクラッチ ダウン ON
+    */
+    auto_clutch_dw_on   = 'auto_clutch_dw_on',
+    /**
+    * AUTOクラッチ ダウン OFF
+    */
+    auto_clutch_dw_off   = 'auto_clutch_dw_off',
+    /**
     * アクセル アップ
     */
     accel_up    = 'accel_up',

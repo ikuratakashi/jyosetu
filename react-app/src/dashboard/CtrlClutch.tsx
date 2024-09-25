@@ -32,9 +32,52 @@ function CtrlClutch(props:UtilsCommon.DashboardContentProps) {
     boxShadow: '2px 2px 5px gray',
   }
 
+  const ButtonAutoSx = { 
+    fontSize: pram.fontSize,
+    fontFamily: 'Courier New, monospace',
+    borderRadius: 0,
+    height:pram.Button_h,
+    backgroundColor:'gray',
+    '&:hover': {
+      backgroundColor: 'gray',
+      filter: 'brightness(0.8)',
+      border:'none',
+    },
+    color:'white',
+    border:'none',
+    boxShadow: '2px 2px 5px gray',
+  }
+
+  const GridSx = {
+    width:'220px',
+    //border:'1px solid black'
+  }
+ 
   return (
     <div>
-      <Grid container spacing={0.3}>
+      <Grid container spacing={0.3} sx={GridSx}>
+      <Grid item xs={0}>
+          <Box sx={{mb:0.2}}>
+            <UtilsButton 
+                variant="outlined" 
+                sx={ButtonAutoSx}
+                props={props} 
+                ButtonType={UtilsCommon.enmButtonType.auto_clutch_dw_on}
+            >
+              AUTO<br/>ON
+            </UtilsButton>
+          </Box>
+          <Box sx={{mb:0.2}}>
+            <UtilsButton 
+                variant="outlined" 
+                sx={ButtonAutoSx}
+                props={props} 
+                ButtonType={UtilsCommon.enmButtonType.auto_clutch_dw_off}
+            >
+              AUTO<br/>OFF
+            </UtilsButton>
+          </Box>
+        </Grid>
         <Grid item xs={0}>
           <Box sx={{mb:0.2}}>
             <UtilsButton 
