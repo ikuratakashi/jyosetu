@@ -4,7 +4,6 @@
  */
 import { MomoManager } from './UtilsMomoManager';
 import { NetworkManager } from './UtilsNetworkManager';
-import { useRef } from 'react';
 
 /**
  * アナログスティックの種類
