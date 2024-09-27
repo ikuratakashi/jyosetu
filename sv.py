@@ -1027,9 +1027,9 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     コマンドをデバイスに送信
     '''
 
-    IsAutoClutchDwStop : bool = False
+    IsAutoClutchDwRun : bool = True
     '''
-    自動クラッチダウンの停止フラグ
+    自動クラッチダウンの実行フラグ
     '''
 
     def __init__(self,pDb:clsDB):
@@ -1064,9 +1064,9 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         自動クラッチダウンのフラグを設定する
         引数：
-            pValue - 設定するフラグ True:停止／False:実行
+            pValue - 設定するフラグ True:実行／False:停止
         '''
-        self.IsAutoClutchDwStop = pValue
+        self.IsAutoClutchDwRun = pValue
 
     def Stop(self):
         '''
@@ -1351,7 +1351,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
                 if Command.Command == "auto_clutch_dw_on":
                     #有効
                     self.SetAutoClutchDwFlag(True)
-                elif Command.Command == "auto_clutch_dw_on":
+                elif Command.Command == "auto_clutch_dw_off":
                     #無効
                     self.SetAutoClutchDwFlag(False)
             
@@ -1415,7 +1415,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=self.JyosetuDB.EnvData.AUTO_CL_QUANTITY)
         while self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == False:
-            if self.IsAutoClutchDwStop == False:
+            if self.IsAutoClutchDwRun == True:
                 self.SendCommand(SendCommand)
                 time.sleep(1.0)
     
