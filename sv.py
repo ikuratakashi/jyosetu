@@ -1,6 +1,83 @@
 version = "10.2.101"
 PgName = "Jyosetu Message Server"
 
+'''
+■良く使う処理
+
+[メソッド名を取得してログを出力する （ローカル版）]
+[...メソッドを再起呼び出しで実行するとselfが変わってしまうので、そういう場合はこれを使う]
+
+cur = inspect.currentframe().f_code.co_name
+Log = clsLog()
+Log.LogOut(cur,clsLog.TYPE_STATUS,f"Server ShatDown Start...")
+
+[メソッド名を取得してログを出力する （各クラス内での実行版）]
+
+self.LogOut(cur,clsLog.TYPE_ERR,f"Serial error:{e}")
+self.LogOut(cur,clsLog.TYPE_WAR,f"CommandSend Serial Re Open Device:{Back.WHITE} {Device.Name} {Back.RESET}")
+self.LogOut(cur,clsLog.TYPE_LOG,f"前回のclutch_dw送信から {sec}秒 ")
+self.LogOut(cur,clsLog.TYPE_STATUS,f"Serial Open Device:{Back.GREEN}{SelDev}{Back.RESET}")
+self.LogOut(cur,clsLog.TYPE_SENDCOMMAND_AUTO,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+self.LogOut(cur,clsLog.TYPE_SENDCOMMAND,f"Key={pCommand.Key},Type={pCommand.Type},Command={pCommand.Command},Quantity={pCommand.Quantity}")
+'''
+
+'''
+■ 各処理へのショートカット文字
+※この文字で検索するとそこへ飛ぶ
+
+[クラス関連]
+ラズパイのACT LEDの点滅
+コマンド送信のデータ
+CommandSendにかかわる値で、スレッド間で共有する値
+自動クラッチのコマンド送信のスレッド内で共有する値
+コマンドをGOIPへ送る
+
+[重要クラス]
+DBクラス
+コマンドをRS232Cで送る
+DBに保存されたコマンドを送信する
+除雪のWebSocketサーバー
+
+[メソッド関連]
+自動クラッチダウンの有効と開始を設定
+DBの作成
+コマンドをテーブルに追加する
+DBに保存されたコマンドを送信する 処理開始
+DBに保存されたコマンドを送信する 処理の停止
+一定の間、コマンドを送信していない場合は、自動クラッチアップを開始する
+クラッチのコマンドを送り続ける 停止／再開
+RS232C シリアル通信を開く
+
+[重要メソッド]
+コマンドをデバイスに送信
+DBを読み込み、コマンドの送信を実行する
+プログラムの終了時
+RS232C コマンドをデバイスへ送信する
+RS232C クラッチのスレッドを開始する
+RS232C クラッチのコマンドを送信する
+RS232C クラッチ アップ コマンド送信
+RS232C クラッチ ダウン コマンド送信
+
+[変数]
+RS232C USBデバイス
+
+[ラズパイ独自の処理など]
+（ラズパイ用）ACTランプの点滅 初期化
+（ラズパイ用）USBデバイスの一覧を取得する
+
+[処理関連]
+自動クラッチダウンの有効と開始を設定
+
+[その他]
+オープニング
+送られてきたコマンドをすぐに処理したい場合は、ここへ記述
+
+[画面のコマンドを増やした時に修正する場所]
+RS232C コマンドをデバイスに送信する
+自動クラッチダウンの有効と開始を設定
+
+'''
+
 import sys
 
 sys.path.append('lib')
@@ -118,6 +195,9 @@ def Openning():
     print('')
     
 class clsDB(clsLog,clsError):
+    '''
+    DBクラス
+    '''
 
     EnvData : clsEnvData
     '''
@@ -225,7 +305,7 @@ class clsDB(clsLog,clsError):
 
     async def InsertCommand(self,pMessage):
         '''
-        コマンドを追加する
+        コマンドをテーブルに追加する
         '''
         cur = inspect.currentframe().f_code.co_name
 
@@ -345,6 +425,9 @@ class clsCommandSendQueueValue():
     '''
 
 class clsAutoClutchSendCommandQueueValue():
+    '''
+    自動クラッチのコマンド送信のスレッド内で共有する値
+    '''
     IsAutoClutchThredEnd : bool = False
     '''
     自動クラッチアップの終了フラグ 開始フラグ
@@ -535,7 +618,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
     UsbDevice : usbdev.clsUsbDevice 
     '''
-    USBデバイス
+    RS232C USBデバイス
     '''
 
     CmdClutchQues : List[clsSendCommandData] = []
@@ -567,10 +650,13 @@ class clsCommandToRS232C(clsLog,clsError):
         '''
         コンストラクタ
         '''
+
+        #（ラズパイ用）ACTランプの点滅 初期化
         self.EnvData = clsEnvData()
         self.ActLed : clsActLed = clsActLed()
         self.ActLed.Init()
 
+        #（ラズパイ用）USBデバイスの一覧を取得する
         self.UsbDevice = usbdev.clsUsbDevice()
         self.UsbDevice.SearchUsbList()
 
@@ -579,7 +665,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
     def SerialOpen(self,pDev:str = "") -> bool:
         '''
-        シリアル通信を開く
+        RS232C シリアル通信を開く
         戻り値：オープンの成功:True／失敗:False
         '''
         cur = inspect.currentframe().f_code.co_name
@@ -624,7 +710,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
     def CommandSendClutchThredStart(self):
         '''
-        クラッチのスレッドを開始する
+        RS232C クラッチのスレッドを開始する
         '''
         self.IsCommandSendClutchThredStop == False
         if self.CommandSendClutchThred == None:
@@ -633,7 +719,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
     def CommandSendClutchThredStop(self):
         '''
-        クラッチのスレッドを止める
+        RS232C クラッチのスレッドを止める
         '''
         self.IsCommandSendClutchThredStop = True
         if self.CommandSendClutchThred != None:
@@ -642,7 +728,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
     def SendCommandClutch(self):
         '''
-        クラッチのスレッドを開始する
+        RS232C クラッチのコマンドを送信する
         '''
         while self.IsCommandSendClutchThredStop == False:
 
@@ -665,7 +751,7 @@ class clsCommandToRS232C(clsLog,clsError):
     
     def Send(self,pCmd:clsSendCommandData):
         '''
-        コマンドをデバイスに送信する
+        RS232C コマンドをデバイスに送信する
         '''
         QueSizeMax = 1
         if len(self.CmdClutchQues) >= QueSizeMax:
@@ -766,7 +852,7 @@ class clsCommandToRS232C(clsLog,clsError):
     
     def SendDevice(self,pCmd:str,pCnt:int = 1):
         '''
-        デバイスへコマンドを送信する
+        RS232C コマンドをデバイスへ送信する
         '''
         cur = inspect.currentframe().f_code.co_name
         try:
@@ -795,7 +881,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
     def Clutch_UP(self,pCmd:clsSendCommandData):
         '''
-        クラッチ アップ
+        RS232C クラッチ アップ コマンド送信
         '''
         e = self.EnvData
         cnt = 0
@@ -821,7 +907,7 @@ class clsCommandToRS232C(clsLog,clsError):
 
     def Clutch_DOWN(self,pCmd:clsSendCommandData):
         '''
-        クラッチ ダウン
+        RS232C クラッチ ダウン コマンド送信
         '''
         e = self.EnvData
         cnt = 0
@@ -941,6 +1027,11 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
     コマンドをデバイスに送信
     '''
 
+    IsAutoClutchDwStop : bool = False
+    '''
+    自動クラッチダウンの停止フラグ
+    '''
+
     def __init__(self,pDb:clsDB):
         '''
         コンストラクタ
@@ -954,7 +1045,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
     def Start(self):
         '''
-        処理開始
+        DBに保存されたコマンドを送信する 処理開始
         '''
 
         #DBファイルの更新の監視を行う処理を開始
@@ -968,10 +1059,18 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         self.StartAutoClutchUpIfIdleThreadStart()
         #コマンド送信のスレッド開始
         self.CommandSendThredStart()
+    
+    def SetAutoClutchDwFlag(self,pValue:bool=True):
+        '''
+        自動クラッチダウンのフラグを設定する
+        引数：
+            pValue - 設定するフラグ True:停止／False:実行
+        '''
+        self.IsAutoClutchDwStop = pValue
 
     def Stop(self):
         '''
-        処理の停止
+        DBに保存されたコマンドを送信する 処理の停止
         '''
         #self.DbObserver.stop()
         #self.DbObserver.join()
@@ -1143,7 +1242,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
 
     def SendCommand(self,pCommand:clsSendCommandData):
         '''
-        実際のコマンドの送信
+        コマンドをデバイスに送信
         '''
         cur = inspect.currentframe().f_code.co_name
         env = self.JyosetuDB.EnvData
@@ -1243,6 +1342,18 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
             errstep = "コマンドを送信"
             for Command in Commands:
                 self.SendCommand(Command)
+
+                ##########################################################
+                # 送られてきたコマンドをすぐに処理したい場合は、ここへ記述
+                ##########################################################
+
+                #自動クラッチダウンの有効と開始を設定
+                if Command.Command == "auto_clutch_dw_on":
+                    #有効
+                    self.SetAutoClutchDwFlag(True)
+                elif Command.Command == "auto_clutch_dw_on":
+                    #無効
+                    self.SetAutoClutchDwFlag(False)
             
             #送信したコマンドを送信完了にする
             if False:
@@ -1304,8 +1415,9 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         '''
         SendCommand : clsSendCommandData = clsSendCommandData(pKey=-1,pType=self.JyosetuDB.EnvData.TYPE_AUTO,pCommand="clutch_up",pQuantity=self.JyosetuDB.EnvData.AUTO_CL_QUANTITY)
         while self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == False:
-            self.SendCommand(SendCommand)
-            time.sleep(1.0)
+            if self.IsAutoClutchDwStop == False:
+                self.SendCommand(SendCommand)
+                time.sleep(1.0)
     
 class clsWebSocketJyosetu(clsLog,clsError):
     '''
@@ -1383,10 +1495,6 @@ class clsWebSocketJyosetu(clsLog,clsError):
         server.close()
         await server.wait_closed()
 
-    async def process_message(self,message):
-        # メッセージの処理
-        print(f"Processing message: {message}")
-
     async def WebSocketHandler(self,websocket, path):
         '''
         WebSocketの処理
@@ -1394,6 +1502,9 @@ class clsWebSocketJyosetu(clsLog,clsError):
         cur = inspect.currentframe().f_code.co_name
         try:
             async for message in websocket:
+                '''
+                クライアントから送らて来たメッセージを受信する所
+                '''
 
                 '''
                 if platform.system() == "Windows":
@@ -1403,18 +1514,13 @@ class clsWebSocketJyosetu(clsLog,clsError):
                 '''
 
                 #print(f"Received message: {message}")
-
                 jsonMsg = json.loads(message)
-                #self.InsertCommandDaemon(jsonMsg)
                 asyncio.create_task(self.JyosetuDB.InsertCommand(jsonMsg))
-                
                 #await websocket.send(f"Echo: {message}")
         except websockets.exceptions.ConnectionClosedError as e:
             self.HandleError(cur,e)
-            #self.RunExit()
         except Exception as e:
             self.HandleError(cur,e)
-            #self.RunExit()
 
     def InsertCommandDaemon(self,pJsonMsg):
         '''
