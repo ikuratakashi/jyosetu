@@ -84,3 +84,26 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 (4) Fixing 'react-scripts' is not recognized error | sebhastian. https://sebhastian.com/react-scripts-not-recognized-fix/.
 (5) Troubleshooting | Create React App. https://create-react-app.dev/docs/troubleshooting/.
 (6) undefined. http://yarnpkg.com/%29.
+
+## React - Material Icons
+
+Material Iconsで検索を行いたい場合は、以下のサイトで検索する
+
+https://mui.com/material-ui/material-icons/
+
+## ソース内で特定のファイル（画像など）を参照したい場合
+
+publicフォルダにファイルを設置します。
+
+例）
+```
+public
+ └ doc
+    └ ラズパイサーバの使い方.md
+```
+
+ソース内での参照は以下の通り。
+
+```
+const markdownUrl = process.env.PUBLIC_URL + '/doc/ラズパイサーバの使い方.md';
+```

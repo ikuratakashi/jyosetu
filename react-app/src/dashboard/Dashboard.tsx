@@ -19,6 +19,7 @@ import { BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-rou
 import Home from './Home';
 import Controller from './Controller';
 import * as UtilsCommon from '../utils/UtilsCommon';
+import CamView from './CamView';
 
 function Copyright(props: any) {
   return (
@@ -195,10 +196,12 @@ function DashboardContent(props: UtilsCommon.DashboardContentProps) {
                   <Route path="/" element={<Controller {...props}/>} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/controller" element={<Controller {...props}/>} />
+                  <Route path="/camview" element={<CamView {...props}/>} />
 
                   <Route path="/jyosetu" element={<Controller {...props}/>} />
                   <Route path="/jyosetu/home" element={<Home />} />
                   <Route path="/jyosetu/controller" element={<Controller {...props}/>} />
+                  <Route path="/jyosetu/camview" element={<CamView {...props}/>} />
 
                 </Routes>
               </Router>

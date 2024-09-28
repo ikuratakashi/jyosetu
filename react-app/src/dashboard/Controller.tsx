@@ -34,7 +34,7 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
   return (
     <Grid container spacing={1} sx={{ height: '100%' }}>
       <Grid item style={{ width: '550px', height: '100%' }}>
-        <Paper sx={{ backgroundColor: 'lightblue', height: '100%' }}>
+        <Paper sx={{ /*backgroundColor: 'lightblue',*/ height: '100%' }}>
           {/* ラズパイのサーバー接続 */}
           <Grid container sx={{width:'100%',mb:1}}>
             <CtrlWebSocket {...props}></CtrlWebSocket>
@@ -154,14 +154,16 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
 
         </Paper>
       </Grid>
+      {/*
       <Grid item style={{ width: '300px', height: '100%' }}>
         <Paper sx={{ backgroundColor: 'lightgreen', height: '100%' }}>
           2列目: 200px
           <GameComponent />
         </Paper>
       </Grid>
+      */}
       <Grid item xs sx={{ height: '100%' }}>
-        <Paper sx={{ backgroundColor: 'lightcoral', height: '100%' }}>
+        <Paper sx={{ /*backgroundColor: 'lightcoral',*/ height: '100%' }}>
 
           <Grid container spacing={0}>
             <Grid item xs={4}></Grid>

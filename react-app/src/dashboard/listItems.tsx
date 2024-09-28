@@ -4,14 +4,18 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
+import VideocamIcon from '@mui/icons-material/Videocam';
+
 import { useNavigate } from 'react-router-dom';
 
 export const mainListItems = (
   <React.Fragment>
 
-    {/* ---------------------------------------- */}
-    {/* Home                                     */}
-    {/* ---------------------------------------- */}
+    {/* ----------------------------------------
+
+      Home                                     
+
+    -------------------------------------------- */}
     <ListItemButton
         onClick={() => {
           window.location.pathname = "./jyosetu/home";
@@ -24,9 +28,11 @@ export const mainListItems = (
       <ListItemText primary="Home" />
     </ListItemButton>
 
-    {/* ---------------------------------------- */}
-    {/* Controller                               */}
-    {/* ---------------------------------------- */}
+    {/* ---------------------------------------- 
+
+      Controller                               
+
+    -------------------------------------------- */}
     <ListItemButton
         onClick={() => {
           window.location.pathname = "./jyosetu/controller";
@@ -37,6 +43,23 @@ export const mainListItems = (
         <VideogameAssetIcon /> 
       </ListItemIcon>
       <ListItemText primary="Controller" />
+    </ListItemButton>
+
+    {/* ---------------------------------------- 
+
+      カメラ                                   
+
+    -------------------------------------------- */}
+    <ListItemButton
+        onClick={() => {
+          window.location.pathname = "./jyosetu/camview";
+      }}
+    >
+      <ListItemIcon>
+        {/* アイコンを変えたいときはココを設定 */}
+        <VideocamIcon /> 
+      </ListItemIcon>
+      <ListItemText primary="Camela" />
     </ListItemButton>
 
   </React.Fragment>

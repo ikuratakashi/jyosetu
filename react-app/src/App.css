@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.markdown-container {
+  padding: 20px; /* 上下左右に20pxの隙間を追加 */
+  margin: 20px;  /* 上下左右に20pxの余白を追加 */
+  border: 1px solid #ddd; /* オプション：境界線を追加 */
+  border-radius: 10px; /* オプション：角を丸くする */
+  background-color: #f9f9f9; /* オプション：背景色を追加 */
+}

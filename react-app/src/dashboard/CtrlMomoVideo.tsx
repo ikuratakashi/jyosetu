@@ -218,8 +218,12 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
 
     return (
         <Grid container sx={GridSx}>
-            {/* リストやボタンなど */}
-            <Grid container sx={{...GridSx, width:"100%"}}>
+            {/***************************
+             
+              リストやボタンなど 
+
+            *****************************/}
+            <Grid container sx={{...GridSx, width:"100%", /*display:"none"*/}}>
                 <Grid item sx={GridSx}>
                     <Select 
                         ref={CodecsRef} 
@@ -255,7 +259,11 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
                 </Grid>
                 <Grid item sx={{...GridSx,...ConnectBox,backgroundColor:bgColor}}></Grid>
             </Grid>
-            {/* カメラ部分*/}
+            {/***************************
+
+              カメラ部分
+
+            *****************************/}
             <Grid container sx={{...GridSx, width:"100%"}}>
                 <video ref={VideoRef} style={VideoStyle} controls>
                 Your browser does not support the video tag.
