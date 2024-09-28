@@ -18,7 +18,7 @@ export const mainListItems = (
     -------------------------------------------- */}
     <ListItemButton
         onClick={() => {
-          window.location.pathname = "./jyosetu/home";
+          window.location.pathname = "./home";
       }}
     >
       <ListItemIcon>
@@ -35,7 +35,7 @@ export const mainListItems = (
     -------------------------------------------- */}
     <ListItemButton
         onClick={() => {
-          window.location.pathname = "./jyosetu/controller";
+          window.location.pathname = "./controller";
       }}
     >
       <ListItemIcon>
@@ -52,7 +52,7 @@ export const mainListItems = (
     -------------------------------------------- */}
     <ListItemButton
         onClick={() => {
-          window.location.pathname = "./jyosetu/camview";
+          window.location.pathname = "./camview";
       }}
     >
       <ListItemIcon>

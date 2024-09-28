@@ -1,4 +1,3 @@
-import React from 'react'
 import MarkdownViewer from './CtrlMarkdownViewer'
 
 function Home() {
