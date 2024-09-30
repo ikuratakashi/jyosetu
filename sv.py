@@ -107,6 +107,7 @@ import serial
 from env import clsEnvData 
 from Log import clsLog
 from colorama import Back, Style
+from Error import clsError
 import usbdev
 
 port = 50001
@@ -159,23 +160,6 @@ class clsActLed():
         self.On()
         time.sleep(0.1)
         self.Off()
-
-class clsError:
-    '''
-    エラー処理
-    '''
-
-    Log : clsLog = clsLog()
-    '''
-    ログ
-    '''
-
-    def HandleError(self,pCur,pMessage):
-        '''
-        エラー処理
-        '''
-        self.Log.LogOut(pCur=pCur,pType=clsLog.TYPE_ERR,pMessage=pMessage)
-
 
 def Openning():
     '''
