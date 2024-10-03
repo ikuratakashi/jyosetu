@@ -18,6 +18,7 @@ class clsEnvData:
     TYPE_OPERATION : str = ""
     TYPE_SOUND : str = ""
     TYPE_AUTO : str = ""
+    TYPE_AUTO_WAR : str = ""
 
     WS_PING_TNTERVAL:int = 20
     WS_PING_TIMEOUT:int = 20
@@ -59,6 +60,7 @@ class clsEnvData:
         self.TYPE_OPERATION = os.getenv('TYPE_OPERATION')
         self.TYPE_SOUND = os.getenv('TYPE_SOUND')
         self.TYPE_AUTO = os.getenv('TYPE_AUTO')
+        self.TYPE_AUTO_WAR = os.getenv('TYPE_AUTO_WAR')
 
         #WebSocket関係
         try:
