@@ -2,6 +2,9 @@ import subprocess
 from typing import List
 from env import clsEnvData 
 from enum import Enum
+from Log import clsLog
+from Error import clsError
+import inspect
 
 class enmUsbType(Enum):
     '''
@@ -40,12 +43,12 @@ class clsUsbDeviceList:
         self.Name = pName
         self.Type = pType
 
-class clsUsbDevice:
+class clsUsbDevice(clsLog,clsError):
     '''
     USBのデバイス名を取得する
     '''
 
-    EnvData: clsEnvData
+    EnvData: clsEnvData = None
     '''
     設定ファイル
     '''
@@ -71,6 +74,8 @@ class clsUsbDevice:
         USBリストの作成
         '''
 
+        cur = inspect.currentframe().f_code.co_name
+
         #
         # シリアルUSB
         #
@@ -87,12 +92,13 @@ class clsUsbDevice:
                 # シリアル通信のデバイス
                 if "ID_USB_MODEL=" in line and "Serial" in line :
                     self.UsbSirialList.append(clsUsbDeviceList(Device,enmUsbType.TypeSerial))
-                    #print(f"{Device},serial")
+                    self.LogOut(cur,clsLog.TYPE_LOG,f"serial:{Device}")
 
         #
         # カメラ
         #
         res = subprocess.run(['sudo ls /dev/video*'],shell=True,executable='/bin/bash',capture_output=True, text=True)
+
         DevicesTmp = res.stdout.split('\n')
         Devices = []
         for DeviceTmp in DevicesTmp:
@@ -101,6 +107,7 @@ class clsUsbDevice:
 
         for Device in Devices:
             udevadm_output = subprocess.check_output(f"v4l2-ctl --device={Device} --all", shell=True,stderr=subprocess.DEVNULL).decode("utf-8").split("\n")
+
             # デバイス情報を表示
             IsCheckOK1 = False
             IsCheckOK2 = False
@@ -112,7 +119,7 @@ class clsUsbDevice:
                     IsCheckOK2 = True
                 if IsCheckOK1 == True and IsCheckOK2 == True:
                     self.UsbCamelaList.append(clsUsbDeviceList(Device,enmUsbType.TypeSerial))
-                    #print(f"{Device},camela")
+                    self.LogOut(cur,clsLog.TYPE_LOG,f"camela:{Device}")
                     break
 
 #clsUsbDevice().SearchUsbList()
