@@ -80,21 +80,20 @@ RS232C コマンドをデバイスに送信する
 
 import sys
 
-sys.path.append('lib')
 import asyncio
 import websockets 
 from websockets.server import WebSocketServerProtocol
 import socket
 import platform
 from datetime import datetime,timedelta
-from dotenv import load_dotenv  # type: ignore
+from dotenv import load_dotenv
 import sqlite3
 import json
 from enum import Enum
 import os
 import time
-from watchdog.observers import Observer # type: ignore
-from watchdog.events import FileSystemEventHandler # type: ignore
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 import threading
 from typing import List
 import signal
@@ -126,7 +125,7 @@ class clsActLed():
 
     LedOnOff : bool = False
     '''
-    LEDの点灯／消灯状態
+    LEDの点灯/消灯状態
     '''
 
     def Init(self):
