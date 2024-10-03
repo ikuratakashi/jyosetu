@@ -1,9 +1,8 @@
 import sys
-sys.path.append('lib')
+from dotenv import load_dotenv,find_dotenv
 import os
 import time
 from datetime import datetime,timedelta
-from dotenv import load_dotenv  # type: ignore
 
 class clsEnvData:
     '''
@@ -43,7 +42,10 @@ class clsEnvData:
         コンストラクタ
         '''
 
-        load_dotenv()
+        for key in list(os.environ.keys()):
+            os.environ.pop(key, None)
+
+        res = load_dotenv()
 
         now = datetime.now()
         now_time = now.strftime('%Y%m%d%H%M%S%f')[:-3]
