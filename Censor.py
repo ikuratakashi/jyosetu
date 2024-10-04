@@ -109,7 +109,7 @@ class clsCensor_Micro(clsLog,clsError):
         # ADS1115オブジェクトの作成
         try:
             ads = ADS.ADS1115(i2c)
-            ads.gain = 16
+            ads.gain = 8
         except Exception as e:
             self.HandleError(cur,f"ADS1115 Unexpected error:{e}")
 
