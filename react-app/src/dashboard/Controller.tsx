@@ -9,6 +9,7 @@ import CtrlDpad from './CtrlDpad';
 import CtrlButton from './CtrlButton';
 import CtrlEStop from './CtrlEStop';
 import CtrlDpad8 from './CtrlDpad8';
+import CtrlResponse from './CtrlResponse';
 import * as UtilsCommon from '../utils/UtilsCommon';
 import GameComponent from './CtrlGamePad';
 import CtrlWebSocket from './CtrlWebSocket';
@@ -148,6 +149,23 @@ function Controller(props: UtilsCommon.DashboardContentProps) {
                 {...props}
                 analogstictype={UtilsCommon.enmAnalogSticType.right}
               />
+            </Grid>
+            <Grid item xs></Grid>
+          </Grid>
+
+          {/* 除雪サーバからのメッセージを表示 */}
+          <Grid container sx={{width: '100%',height:'180px',mb:1}}>
+            <Grid item xs></Grid>
+            <Grid item 
+                  sx={{
+                        //border:"solid black 1px",
+                        width:'95%',
+                        height:'150px',
+                        display:'flex',
+                        justifyContent: 'center' // 水平方向の中央揃え
+                      }}>
+              {/* メッセージ表示エリア */}
+              <CtrlResponse {...props}/>
             </Grid>
             <Grid item xs></Grid>
           </Grid>
