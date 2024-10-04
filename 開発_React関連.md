@@ -107,3 +107,79 @@ public
 ```
 const markdownUrl = process.env.PUBLIC_URL + '/doc/ラズパイサーバの使い方.md';
 ```
+
+# React コード補完
+
+VSCodeでReact開発を行う際に、コード補完やスニペットを自動的に提供してくれる機能があります。これらの機能を利用することで、効率的にコーディングができます。以下に、いくつかの基本的なスニペットやコード補完の例を示します。
+
+* **インストールが必要な拡張機能**
+  ```
+  ES7+ React/Redux/React-Native snippets
+  ```
+
+### 基本的なスニペット
+1. **`rfc`**:
+   - React Functional Componentのテンプレートを生成します。
+   ```javascript
+   import React from 'react';
+
+   const ComponentName = () => {
+       return (
+           <div>
+               
+           </div>
+       );
+   }
+
+   export default ComponentName;
+   ```
+
+2. **`rcc`**:
+   - React Class Componentのテンプレートを生成します。
+   ```javascript
+   import React, { Component } from 'react';
+
+   class ComponentName extends Component {
+       render() {
+           return (
+               <div>
+                   
+               </div>
+           );
+       }
+   }
+
+   export default ComponentName;
+   ```
+
+3. **`useState`**:
+   - `useState`フックのテンプレートを生成します。
+   ```javascript
+   const [state, setState] = useState(initialState);
+   ```
+
+4. **`useEffect`**:
+   - `useEffect`フックのテンプレートを生成します。
+   ```javascript
+   useEffect(() => {
+       // Effect
+       return () => {
+           // Cleanup
+       };
+   }, [dependencies]);
+   ```
+
+### 拡張機能の利用
+VSCodeには、React開発を支援するための拡張機能が多数あります。以下の拡張機能をインストールすると、さらに便利になります。
+
+1. **ES7+ React/Redux/React-Native snippets**:
+   - 上記のスニペットを含む多くのスニペットを提供します。
+   - インストール後、`rfc`や`rcc`などのショートカットを使用できます。
+
+2. **Prettier - Code formatter**:
+   - コードのフォーマットを自動的に整えてくれます。
+
+3. **ESLint**:
+   - コードの品質を保つためのLintingツールです。
+
+これらのスニペットや拡張機能を活用することで、React開発がよりスムーズになります。何か他にご質問があれば、お気軽にどうぞ！
