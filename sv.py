@@ -114,6 +114,8 @@ import serial
 from colorama import Back, Style
 from Db import clsDB
 
+from SendMessageClient import clsSendMessageClient,enmSendMessageClientType
+
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
 
@@ -482,15 +484,18 @@ class clsCommandToRS232C(clsLog,clsError):
         else:
             SelDev = pDev
 
-        try:
-            self.CmmandSendSerial = serial.Serial(SelDev, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
-            self.LogOut(cur,clsLog.TYPE_STATUS,f"Serial Open Device:{Back.GREEN}{SelDev}{Back.RESET}")
-        except serial.SerialException as e:
-            self.LogOut(cur,clsLog.TYPE_ERR,f"Serial error:{e}")
-            IsError = True
-        except Exception as e:
-            self.LogOut(cur,clsLog.TYPE_ERR,f"Unexpected error:{e}")
-            IsError = True
+        if SelDev == "":
+            self.LogOut(cur,clsLog.TYPE_WAR,f"Serial No Device:'{SelDev}'")
+        else:
+            try:
+                self.CmmandSendSerial = serial.Serial(SelDev, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
+                self.LogOut(cur,clsLog.TYPE_STATUS,f"Serial Open Device:{Back.GREEN}{SelDev}{Back.RESET}")
+            except serial.SerialException as e:
+                self.LogOut(cur,clsLog.TYPE_ERR,f"Serial error:{e}")
+                IsError = True
+            except Exception as e:
+                self.LogOut(cur,clsLog.TYPE_ERR,f"Unexpected error:{e}")
+                IsError = True
 
         if IsError == True:
             Result = False
@@ -509,8 +514,13 @@ class clsCommandToRS232C(clsLog,clsError):
         '''
         スレッドを停止する
         '''
+        cur = inspect.currentframe().f_code.co_name
         self.CommandSendClutchThredStop()
-        self.CmmandSendSerial.close()
+        try:
+            if self.CmmandSendSerial != None:
+                self.CmmandSendSerial.close()
+        except Exception as e:
+            self.HandleError(cur,f"{e}")
 
     def CommandSendClutchThredStart(self):
         '''
@@ -670,11 +680,15 @@ class clsCommandToRS232C(clsLog,clsError):
                 self.SerialOpen()
 
             if self.CmmandSendSerial != None :
+
                 if self.CmmandSendSerial.is_open == False:
                     self.CmmandSendSerial.open()
+
                 if self.CmmandSendSerial.is_open == True:
+
                     self.CmmandSendSerial.write(f"{','.join(Cmds)},".encode('utf-8'))
                     self.ActLed.AutoOnOff()
+
                 else:
                     self.LogOut(cur,clsLog.TYPE_WAR,f"Serial Closed Device:{self.EnvData.RS232C_DEV_SEND}")
 
@@ -1243,6 +1257,11 @@ class clsWebSocketJyosetu(clsLog,clsError):
     WebSocketsサーバー
     '''
 
+    ConnectedClients = set()
+    '''
+    接続してきたクライアント
+    '''
+
     Websocket : WebSocketServerProtocol = None
     '''
     WebSocket
@@ -1281,7 +1300,7 @@ class clsWebSocketJyosetu(clsLog,clsError):
         self.JyosetuDB.CreateDb()
 
         #センサーマネージャー
-        self.CensorManager = clsCensorManager()
+        self.CensorManager = clsCensorManager(self.SendClientMessage)
         self.CensorManager.Start()
 
         #共通で使用するDBをオープンする
@@ -1318,7 +1337,7 @@ class clsWebSocketJyosetu(clsLog,clsError):
         WebSocketの処理
         '''
         cur = inspect.currentframe().f_code.co_name
-        self.Websocket = websocket
+        self.ConnectedClients.add(websocket)
 
         try:
             async for message in websocket:
@@ -1342,17 +1361,21 @@ class clsWebSocketJyosetu(clsLog,clsError):
         except Exception as e:
             self.HandleError(cur,e)
 
-    async def SendClientMessage(self,Message:str):
+    async def SendClientMessage(self,Message:clsSendMessageClient):
         '''
         クライアントへメッセージを送信する
         '''
         cur = inspect.currentframe().f_code.co_name
+        MessageStr = Message.ToJson()
+
         try:
 
-            if self.Websocket.open:
-                await self.Websocket.send(f"{Message}")
-            else:
-                self.LogOut(cur,clsLog.TYPE_WAR,"WebSocket Closed No SendMessage {Message}")
+            if self.ConnectedClients:
+                for client in self.ConnectedClients:
+                    if client.open:
+                        await client.send(MessageStr)
+                    else:
+                        self.LogOut(cur,clsLog.TYPE_WAR,f"WebSocket Closed No SendMessage {MessageStr}")
 
         except websockets.exceptions.ConnectionClosedError as e:
             self.HandleError(cur,e)
@@ -1380,6 +1403,7 @@ class clsWebSocketJyosetu(clsLog,clsError):
         '''
         self.JyosetuDB.DbClose()
         self.SendCommand.Stop()
+        self.CensorManager.Stop()
         #self.WebSocketServer.close()
 
 def shutdown():

@@ -1,18 +1,20 @@
+import asyncio
 import threading
 import inspect
 import board
 import busio
+import time
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
-from datetime import datetime,time
+from datetime import datetime
 from enum import Enum
 
 from env import clsEnvData
 from Error import clsError
 from Log import clsLog
 from Db import clsDB
-from sv import clsWebSocketJyosetu
+from SendMessageClient import clsSendMessageClient,enmSendMessageClientType
 
 class clsCensor_Micro_Enum(Enum):
     '''
@@ -71,12 +73,12 @@ class clsCensor_Micro(clsLog,clsError):
         self.EnvData = clsEnvData()
         self.CensorName = CensorName
 
-    def open(self):
+    def Open(self):
         '''
         オープン
         '''
     
-    def close(self):
+    def Stop(self):
         '''
         クローズ
         '''
@@ -107,6 +109,7 @@ class clsCensor_Micro(clsLog,clsError):
         # ADS1115オブジェクトの作成
         try:
             ads = ADS.ADS1115(i2c)
+            ads.gain = 16
         except Exception as e:
             self.HandleError(cur,f"ADS1115 Unexpected error:{e}")
 
@@ -136,6 +139,8 @@ class clsCensor_Micro(clsLog,clsError):
                     data = clsCensor_Micro_Data(Name=self.CensorName,Vol=chan.voltage,Value=chan.value)
                     self.onReceive(data)
 
+                    self.LogOut(cur,self.Log.TYPE_MICRO,f"Micro Data : name={data.name},value={data.value},vol={data.vol}")
+
                     time.sleep(0.3)
 
             except Exception as e:
@@ -151,6 +156,11 @@ class clsCensor_Micro(clsLog,clsError):
         '''
         受信のイベント
         '''
+
+        #マイクロ波の場合
+        #以下のソースがclsCensorManagerに記載されている
+        # self.Censor_Micro.onReceive = self.onCensor_Micro_Receive
+
         pass
 
 class clsCensorManager(clsLog,clsError):
@@ -173,17 +183,17 @@ class clsCensorManager(clsLog,clsError):
     除雪DB
     '''
 
-    WebSocketJyosetu : clsWebSocketJyosetu = None
+    SendClientMessage : any = None
     '''
-    WebSocketJyosetu
+    クライアントへのメッセージ送信
     '''
 
-    def __init__(self,WebSocketJyosetu:clsWebSocketJyosetu):
+    def __init__(self,SendClientMessage:any):
         '''
         コンストラクタ
         '''
         self.EnvData = clsEnvData()
-        self.WebSocketJyosetu = WebSocketJyosetu
+        self.SendClientMessage = SendClientMessage
     
     def Start(self):
         '''
@@ -200,7 +210,7 @@ class clsCensorManager(clsLog,clsError):
         self.Censor_Micro.onReceive = self.onCensor_Micro_Receive
         self.Censor_Micro.Start()
 
-    def Close(self):
+    def Stop(self):
         '''
         各種センサーのクローズ
         '''
@@ -209,7 +219,7 @@ class clsCensorManager(clsLog,clsError):
         self.JyosetuDB.DbClose()
 
         # マイクロ波センサー
-        self.Censor_Micro.close()
+        self.Censor_Micro.Stop()
 
     def onCensor_Micro_Receive(self,pData:clsCensor_Micro_Data):
         '''
@@ -242,15 +252,27 @@ class clsCensorManager(clsLog,clsError):
                                     }
                                 ]
                 }
-                self.JyosetuDB.InsertCommand(message)
+
+                async def InsertCommandLocal(message):
+                    cur = inspect.currentframe().f_code.co_name
+                    try:
+                        await self.JyosetuDB.InsertCommand(message)
+                    except Exception as e:
+                        await self.HandleErrorAsync(cur,f"Unexpected error:{e}")
+
+                async def some_async_function(message):
+                    task = asyncio.create_task(InsertCommandLocal(message))
+                    await task
+
+                asyncio.run(some_async_function(message))
 
                 # クライアント側にメッセージを送信する
-                self.SendClientMessage(pData)
+                self.SendClientMessage_Micro(pData)
         
         except Exception as e:
             self.HandleError(cur,f"Unexpected error:{e}")
 
-    def SendClientMessage(self,pData:clsCensor_Micro_Data):
+    def SendClientMessage_Micro(self,pData:clsCensor_Micro_Data):
         '''
         クライアントにメッセージを送信する
         '''
@@ -264,4 +286,16 @@ class clsCensorManager(clsLog,clsError):
         elif pData.name == clsCensor_Micro_Enum.CS_RIGHT:
             message = "右に障害物"
         
-        self.WebSocketJyosetu.SendClientMessage(message)
+        SendMessage : clsSendMessageClient = clsSendMessageClient()
+        SendMessage.type = enmSendMessageClientType.MICRO
+
+        SendMessage.message = message
+        
+        #sv.pyのclsWebSocketJyosetu.SendClientMessage()にリンクされている
+        async def some_async_function(SendMessage):
+            task = asyncio.create_task(self.SendClientMessage(SendMessage))
+            await task
+
+        asyncio.run(some_async_function(SendMessage))
+
+        

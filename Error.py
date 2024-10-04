@@ -15,3 +15,9 @@ class clsError:
         エラー処理
         '''
         self.Log.LogOut(pCur=pCur,pType=clsLog.TYPE_ERR,pMessage=pMessage)
+
+    async def HandleErrorAsync(self,pCur,pMessage):
+        '''
+        エラー処理
+        '''
+        self.Log.LogOut(pCur=pCur,pType=clsLog.TYPE_ERR,pMessage=pMessage)

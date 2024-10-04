@@ -26,6 +26,11 @@ class clsLog:
     ログタイプ:Log
     '''
 
+    TYPE_MICRO : str = "MICRO"
+    '''
+    ログタイプ:MICRO(マイクロ波センサーの値)
+    '''
+
     TYPE_STATUS : str = "STATUS"
     '''
     ログタイプ:ステータス
@@ -151,6 +156,15 @@ class clsLog:
             if self.EnvData.WS_LOG_RS232C_STDOUT == 1:
                 PrintStr = f"{clsLog.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
                 print(PrintStr)
+
+        elif pType == clsLog.TYPE_MICRO:
+            '''
+            マイクロ波センサーのログ
+            '''
+            if self.EnvData.WS_LOG_RS232C_STDOUT == 1:
+                PrintStr = f"{clsLog.F_DEF}[{now_time}:{pType}:{pCur}(?)] {pMessage}{clsLog.R}"
+                print(PrintStr)
+
         else:
             '''
             通常ログ

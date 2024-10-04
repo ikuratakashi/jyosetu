@@ -23,6 +23,7 @@ class clsEnvData:
     WS_LOG_ETC_STDOUT:int = 1
     WS_LOG_FILE_OUT:int = 0
     WS_LOG_RS232C_STDOUT:int = 0
+    WS_LOG_MICRO_STDOUT:int = 0
 
     DB_COM_BEFTIME:int = 30
 
@@ -93,6 +94,12 @@ class clsEnvData:
             pass
         try:
             self.WS_LOG_RS232C_STDOUT = int(os.getenv('WS_LOG_RS232C_STDOUT'))
+        except:
+            pass
+
+        #マイクロ波センサー関連
+        try:
+            self.WS_LOG_MICRO_STDOUT = int(os.getenv('WS_LOG_MICRO_STDOUT'))
         except:
             pass
 
