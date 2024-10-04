@@ -1,7 +1,5 @@
-import sys
-sys.path.append('lib')
-from colorama import init, Fore, Back, Style # type: ignore
-from datetime import datetime,timedelta
+from colorama import init, Fore, Back, Style
+from datetime import datetime
 from env import clsEnvData
 
 class clsLog:

@@ -5,7 +5,6 @@ from Log import clsLog
 import inspect
 import signal
 from colorama import init, Fore, Back, Style
-import subprocess
 import time
 import usbdev
 

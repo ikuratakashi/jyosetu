@@ -109,7 +109,6 @@ from Censor import clsCensorManager
 
 import usbdev
 
-#import RPi.GPIO as GPIO
 import pigpio
 import serial
 from colorama import Back, Style
