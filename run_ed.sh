@@ -18,7 +18,7 @@ echo ""
 echo "※プロセス終了できなかった場合"
 echo "（実行中のプロセスを以下に表示）"
 
-ps -ef | grep -E 'sv\.py|rs232c\.py|www\.py'
+ps -ef | grep -E 'sv\.py|rs232c\.py|www\.py|momo'
 
 echo ""
 echo "（上記に何も表示されなかった場合はプロセスは起動していません。）"
