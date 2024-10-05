@@ -2,7 +2,8 @@
 
 cd /home/jyosetu/jyosetu
 
-sudo /usr/bin/python ./sv.py &
+#sudo /usr/bin/python ./sv.py &
+python ./sv.py &
 echo 通信サーバ プロセスID：$!
 echo $! > ./tmp/websocket.pid
 

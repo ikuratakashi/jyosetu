@@ -81,6 +81,7 @@ RS232C コマンドをデバイスに送信する
 import sys
 
 import asyncio
+import gpiod.line_info
 import websockets 
 from websockets.server import WebSocketServerProtocol
 import socket
@@ -113,8 +114,13 @@ import pigpio
 import serial
 from colorama import Back, Style
 from Db import clsDB
+from env import clsEnvData
+import subprocess
 
 from SendMessageClient import clsSendMessageClient,enmSendMessageClientType
+import RPi.GPIO as GPIO
+import gpiod
+import gpiozero
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
@@ -124,22 +130,50 @@ class clsActLed():
     ラズパイのACT LEDの点滅
     '''
 
+    EnvData : clsEnvData = None
+    '''
+    Envデータ
+    '''
+
     LedOnOff : bool = False
     '''
     LEDの点灯/消灯状態
+    '''
+
+    GPIOLineAct : gpiod.LineRequest
+    '''
+    ACTランプとして使用するGPIOのライン
     '''
 
     def Init(self):
         '''
         デフォルトの点灯を無効に
         '''
+
+        self.EnvData = clsEnvData()
+
+        # GPIOラインの設定
+        LINE = self.EnvData.GP_NO_ACT
+        gpiod.Chip('/dev/gpiochip0').close()
+        self.GPIOLineAct = gpiod.request_lines(
+            '/dev/gpiochip0',
+            consumer="LED",
+            config={
+                LINE : gpiod.LineSettings(
+                    direction=gpiod.line.Direction.OUTPUT,
+                    output_value=gpiod.line.Value.INACTIVE
+                )
+            })
+
         #os.system('sudo sh -c echo none > /sys/class/leds/ACT/trigger')
         os.system('echo none | sudo tee /sys/class/leds/ACT/trigger >/dev/null 2>&1')
+
     def On(self):
         '''
         点灯
         '''
         #os.system('sudo sh -c echo 1 > /sys/class/leds/ACT/brightness')
+        self.GPIOLineAct.set_value(self.EnvData.GP_NO_ACT,gpiod.line.Value.ACTIVE)
         os.system('echo 1 | sudo tee /sys/class/leds/ACT/brightness >/dev/null 2>&1')
         self.LedOnOff = True
         
@@ -147,6 +181,7 @@ class clsActLed():
         '''
         消灯
         '''
+        self.GPIOLineAct.set_value(self.EnvData.GP_NO_ACT,gpiod.line.Value.INACTIVE)
         #os.system('sudo sh -c echo 0 > /sys/class/leds/ACT/brightness')
         os.system('echo 0 | sudo tee /sys/class/leds/ACT/brightness >/dev/null 2>&1')
         self.LedOnOff = False
@@ -166,6 +201,14 @@ class clsActLed():
         self.On()
         time.sleep(0.1)
         self.Off()
+
+    def Stop(self):
+        '''
+        終了処理
+        '''
+        chip = gpiod.Chip('/dev/gpiochip0')
+        if chip != None:
+            chip.close()
 
 def Openning():
     '''
@@ -521,6 +564,8 @@ class clsCommandToRS232C(clsLog,clsError):
                 self.CmmandSendSerial.close()
         except Exception as e:
             self.HandleError(cur,f"{e}")
+        
+        self.ActLed.Stop()
 
     def CommandSendClutchThredStart(self):
         '''
@@ -671,6 +716,9 @@ class clsCommandToRS232C(clsLog,clsError):
         cur = inspect.currentframe().f_code.co_name
         try:
 
+            # 一時的
+            self.ActLed.AutoOnOff()
+
             Cmds = []
             max = pCnt
             for i in range(max):
@@ -686,8 +734,8 @@ class clsCommandToRS232C(clsLog,clsError):
 
                 if self.CmmandSendSerial.is_open == True:
 
-                    self.CmmandSendSerial.write(f"{','.join(Cmds)},".encode('utf-8'))
                     self.ActLed.AutoOnOff()
+                    self.CmmandSendSerial.write(f"{','.join(Cmds)},".encode('utf-8'))
 
                 else:
                     self.LogOut(cur,clsLog.TYPE_WAR,f"Serial Closed Device:{self.EnvData.RS232C_DEV_SEND}")

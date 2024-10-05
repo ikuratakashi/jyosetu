@@ -28,6 +28,7 @@ class clsEnvData:
     DB_COM_BEFTIME:int = 30
 
     GP_NO_clutch_up_down:int = 2 
+    GP_NO_ACT:int = 15
 
     AUTO_CL_QUANTITY:int = 5
 
@@ -106,6 +107,10 @@ class clsEnvData:
         #GOPI関連
         try:
             self.GP_NO_clutch_up_down = int(os.getenv('GP_NO_clutch_up_down'))
+        except:
+            pass
+        try:
+            self.GP_NO_ACT = int(os.getenv('GP_NO_ACT'))
         except:
             pass
 
