@@ -1,3 +1,5 @@
+#!/home/jyosetu/.pyenv/shims/python
+
 version = "10.2.101"
 PgName = "Jyosetu Message Server"
 
@@ -528,7 +530,7 @@ class clsCommandToRS232C(clsLog,clsError):
             SelDev = pDev
 
         if SelDev == "":
-            self.LogOut(cur,clsLog.TYPE_WAR,f"Serial No Device:'{SelDev}'")
+            self.LogOut(cur,clsLog.TYPE_STATUS,f"Serial No Device:'{SelDev}'")
         else:
             try:
                 self.CmmandSendSerial = serial.Serial(SelDev, e.RS232C_BPS, timeout=e.RS232C_TIMEOUT,xonxoff=True)
@@ -1401,6 +1403,7 @@ class clsWebSocketJyosetu(clsLog,clsError):
                 '''
 
                 #print(f"Received message: {message}")
+                self.LogOut(cur,self.Log.TYPE_LOG,f"Client Receive Message:{message}")
                 jsonMsg = json.loads(message)
                 asyncio.create_task(self.JyosetuDB.InsertCommand(jsonMsg))
                 #await websocket.send(f"Echo: {message}")

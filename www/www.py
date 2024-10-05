@@ -1,7 +1,10 @@
+#!/home/jyosetu/.pyenv/shims/python
+
 import http.server
 import socketserver
 import sys
 import signal
+import platform
 
 class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -15,6 +18,7 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     PORT = 50100
+    print(f"Python version : {platform.python_version()}")
 
     Handler = MyRequestHandler
 

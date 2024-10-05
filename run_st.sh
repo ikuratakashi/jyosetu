@@ -3,7 +3,7 @@
 cd /home/jyosetu/jyosetu
 
 #sudo /usr/bin/python ./sv.py &
-python ./sv.py &
+sudo ./sv.py &
 echo 通信サーバ プロセスID：$!
 echo $! > ./tmp/websocket.pid
 
@@ -12,7 +12,8 @@ echo $! > ./tmp/websocket.pid
 #echo $! > ./tmp/rs232c.pid
 
 cd ./www
-/usr/bin/python ./www.py &
+#/usr/bin/python ./www.py &
+sudo ./www.py &
 echo Webサーバ プロセスID：$!
 echo $! > ../tmp/www.pid
 
