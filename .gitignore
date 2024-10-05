@@ -13,6 +13,7 @@ websockets
 webrtc_logs*
 *.pid
 *.pyc
+*.log
 
 # 設定が終わったら、以下のコマンドの様に実行してキャッシュをクリアしてください
 # git rm --cached websockets
