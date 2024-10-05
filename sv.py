@@ -98,31 +98,33 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
-from typing import List
 import signal
 import inspect
 import queue
 import subprocess
 import copy
+from typing import List
 
+from Db import clsDB
 from env import clsEnvData 
 from Log import clsLog
 from Error import clsError
 from Censor import clsCensorManager
-
+from CommonUtil import CommonUtil
+from CameraData import clsCameraData
 import usbdev
+
 
 import pigpio
 import serial
 from colorama import Back, Style
-from Db import clsDB
-from env import clsEnvData
 import subprocess
 
 from SendMessageClient import clsSendMessageClient,enmSendMessageClientType
 import RPi.GPIO as GPIO
 import gpiod
 import gpiozero
+
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
@@ -1285,8 +1287,7 @@ class clsSendCommandFromDB(FileSystemEventHandler,clsLog,clsError):
         while self.AutoClutchSendCommandQueueValue.IsAutoClutchThredEnd == False:
             if self.IsAutoClutchDwRun == True:
                 self.SendCommand(SendCommand)
-                time.sleep(1.0)
-    
+                time.sleep(1.0)    
 class clsWebSocketJyosetu(clsLog,clsError):
     '''
     除雪のWebSocketサーバー

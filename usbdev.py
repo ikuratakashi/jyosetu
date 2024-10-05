@@ -16,7 +16,7 @@ class enmUsbType(Enum):
     USBタイプ：シリアル
     '''
 
-    TypeCamela = "Cam"
+    TypeCamera = "Cam"
     '''
     USBタイプ：カメラ
     '''
@@ -58,7 +58,7 @@ class clsUsbDevice(clsLog,clsError):
     Usbのシリアルケーブルのリスト
     '''
 
-    UsbCamelaList : List[clsUsbDeviceList] = []
+    UsbCameraList : List[clsUsbDeviceList] = []
     '''
     USBのカメラのリスト
     '''
@@ -118,7 +118,7 @@ class clsUsbDevice(clsLog,clsError):
                 if "Pixel Format" in line and "H264" in line:
                     IsCheckOK2 = True
                 if IsCheckOK1 == True and IsCheckOK2 == True:
-                    self.UsbCamelaList.append(clsUsbDeviceList(Device,enmUsbType.TypeSerial))
+                    self.UsbCameraList.append(clsUsbDeviceList(Device,enmUsbType.TypeCamera))
                     self.LogOut(cur,clsLog.TYPE_LOG,f"camela:{Device}")
                     break
 

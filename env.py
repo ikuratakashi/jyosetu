@@ -37,6 +37,11 @@ class clsEnvData:
     RS232C_BPS:int = 9600
     RS232C_TIMEOUT = 1
 
+    MOMO_PORT_NO_START:int = 51001
+    MOMO_WS:str = "ws"
+    MOMO_CODEC:str = "H264"
+    MOMO_CMD:str = "./momo --no-audio-device --video-device %Device% --resolution QVGA test --port %PortNo% &"
+
     def __init__(self):
         '''
         コンストラクタ
@@ -50,6 +55,9 @@ class clsEnvData:
         now = datetime.now()
         now_time = now.strftime('%Y%m%d%H%M%S%f')[:-3]
 
+        ######################################################################
+        #基本関連
+        ######################################################################
         self.VERSION = os.getenv('VERSION')
         self.DB_JYOSETU_MODE = os.getenv('DB_JYOSETU_MODE')
         if self.DB_JYOSETU_MODE == "ONE":
@@ -64,7 +72,9 @@ class clsEnvData:
         self.TYPE_AUTO = os.getenv('TYPE_AUTO')
         self.TYPE_AUTO_WAR = os.getenv('TYPE_AUTO_WAR')
 
+        ######################################################################
         #WebSocket関係
+        ######################################################################
         try:
             self.WS_PING_TIMEOUT = int(os.getenv('WS_PING_INTERVAL'))
         except:
@@ -98,13 +108,17 @@ class clsEnvData:
         except:
             pass
 
+        ######################################################################
         #マイクロ波センサー関連
+        ######################################################################
         try:
             self.WS_LOG_MICRO_STDOUT = int(os.getenv('WS_LOG_MICRO_STDOUT'))
         except:
             pass
 
+        ######################################################################
         #GOPI関連
+        ######################################################################
         try:
             self.GP_NO_clutch_up_down = int(os.getenv('GP_NO_clutch_up_down'))
         except:
@@ -114,13 +128,17 @@ class clsEnvData:
         except:
             pass
 
+        ######################################################################
         #自動クラッチ関連
+        ######################################################################
         try:
             self.AUTO_CL_QUANTITY = int(os.getenv('AUTO_CL_QUANTITY'))
         except:
             pass
 
+        ######################################################################
         #RS232C関連
+        ######################################################################
         ##送信デバイス
         self.RS232C_DEV_SEND = os.getenv('RS232C_DEV_SEND')
         ##送信デバイス
@@ -133,6 +151,17 @@ class clsEnvData:
         ##タイムアウト
         try:
             self.RS232C_TIMEOUT = int(os.getenv('RS232C_TIMEOUT'))
+        except:
+            pass
+
+        ######################################################################
+        #MOMO関連
+        ######################################################################
+        self.MOMO_CMD = os.getenv('MOMO_CMD')
+        self.MOMO_WS = os.getenv('MOMO_WS')
+        self.MOMO_CODEC = os.getenv('MOMO_CODEC')
+        try:
+            self.MOMO_PORT_NO_START = int(os.getenv('MOMO_PORT_NO_START'))
         except:
             pass
 
