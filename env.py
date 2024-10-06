@@ -40,7 +40,9 @@ class clsEnvData:
     MOMO_PORT_NO_START:int = 51001
     MOMO_WS:str = "ws"
     MOMO_CODEC:str = "H264"
-    MOMO_CMD:str = "./momo --no-audio-device --video-device %Device% --resolution QVGA test --port %PortNo% &"
+    MOMO_CMD_ARGS:str = "--no-audio-device --video-device %Device% --resolution QVGA test --port %PortNo%"
+    MOMO_PATH:str = "/home/jyosetu/jyosetu/momo/momo"
+    MOMO_CMD_SUDO:str = ""
 
     def __init__(self):
         '''
@@ -157,7 +159,9 @@ class clsEnvData:
         ######################################################################
         #MOMO関連
         ######################################################################
-        self.MOMO_CMD = os.getenv('MOMO_CMD')
+        self.MOMO_PATH = os.getenv('MOMO_PATH')
+        self.MOMO_CMD_SUDO = os.getenv('MOMO_CMD_SUDO')
+        self.MOMO_CMD_ARGS = os.getenv('MOMO_CMD_ARGS')
         self.MOMO_WS = os.getenv('MOMO_WS')
         self.MOMO_CODEC = os.getenv('MOMO_CODEC')
         try:

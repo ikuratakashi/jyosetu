@@ -7,6 +7,9 @@ import usbdev
 
 from typing import List
 import threading
+import subprocess
+import inspect
+import os
 
 class clsMomoCamera(clsLog,clsError):
     '''
@@ -51,6 +54,7 @@ class clsMomoCamera(clsLog,clsError):
         '''
         momoのサービスを開始する
         '''
+        cur = inspect.currentframe().f_code.co_name
 
         #./momo --no-audio-device --video-device %Device% --resolution QVGA test --port %PortNo% &
         MomoPortNo = self.EnvData.MOMO_PORT_NO_START
@@ -58,21 +62,50 @@ class clsMomoCamera(clsLog,clsError):
 
         for Camera in self.UsbDevice.UsbCameraList:
 
-            Cmd = self.EnvData.MOMO_CMD
-            Cmd = Cmd.replace("%Device%",Camera.Name)
-            Cmd = Cmd.replace("%PortNo%",MomoPortNo)
+            Args = self.EnvData.MOMO_CMD_ARGS
+            Args = Args.replace("%Device%",Camera.Name)
+            Args = Args.replace("%PortNo%",str(MomoPortNo))
+
+            Cmd = ""
+            if self.EnvData.MOMO_CMD_SUDO == "":
+                Cmd = f"{self.EnvData.MOMO_PATH} {Args}"
+            else:
+                Cmd = f"{self.EnvData.MOMO_CMD_SUDO} {self.EnvData.MOMO_PATH} {Args}"
+            self.LogOut(cur,clsLog.TYPE_LOG,f"momo command:{Cmd}")
+
+            Cmds = []
+            if self.EnvData.MOMO_CMD_SUDO != "":
+                Cmds.append(self.EnvData.MOMO_CMD_SUDO)
+            Cmds.append(self.EnvData.MOMO_PATH)
+            Cmds.extend(Args.split())
+
+            process = subprocess.Popen(Cmds)
 
             self.CameraDatas.append(clsCameraData(
                 DeviceName=Camera.Name,
                 PortNo=MomoPortNo,
                 Codec=self.EnvData.MOMO_WS,
-                ServerIp=LocalIp
+                ServerIp=LocalIp,
+                ProcessId=process.pid
             ))
 
             MomoPortNo = MomoPortNo + 1
+    
+    def MomoServicesStop(self):
+        '''
+        momoサービスの停止
+        '''
+        cur = inspect.currentframe().f_code.co_name
+
+        for Data in self.CameraDatas:
+            try:
+                os.kill(Data.ProcessId,9)
+            except Exception as e:
+                self.LogOut(cur,clsLog.TYPE_ERR,f"Unexpected error kill pid{Data.ProcessId}:{e}")
 
 if __name__ == "__main__":
     MomoCamera = clsMomoCamera()
-    MomoCamera.CreateCamelaData()
+    MomoCamera.CreateCamelaDataThred()
     MomoCamera.MomoServicesStart()
+    MomoCamera.MomoServicesStop()
 

@@ -5,6 +5,7 @@ from enum import Enum
 from Log import clsLog
 from Error import clsError
 import inspect
+import re
 
 class enmUsbType(Enum):
     '''
@@ -95,8 +96,9 @@ class clsUsbDevice(clsLog,clsError):
                     self.LogOut(cur,clsLog.TYPE_LOG,f"serial:{Device}")
 
         #
-        # カメラ
+        # カメラ 旧バージョンのmomo用
         #
+        '''
         res = subprocess.run(['sudo ls /dev/video*'],shell=True,executable='/bin/bash',capture_output=True, text=True)
 
         DevicesTmp = res.stdout.split('\n')
@@ -121,5 +123,22 @@ class clsUsbDevice(clsLog,clsError):
                     self.UsbCameraList.append(clsUsbDeviceList(Device,enmUsbType.TypeCamera))
                     self.LogOut(cur,clsLog.TYPE_LOG,f"camela:{Device}")
                     break
+        ''' 
 
-#clsUsbDevice().SearchUsbList()
+        #
+        # カメラ 新バージョンのmomo用
+        #        
+        res = subprocess.run(['sudo v4l2-ctl --list-devices | grep \'Camera\''],shell=True,executable='/bin/bash',capture_output=True, text=True)
+        DevicesTmp = res.stdout.split('\n')
+        Devices = []
+        for DeviceTmp in DevicesTmp:
+            if DeviceTmp != "":
+                #DeviceTmp = "UVC Camera (046d:0825) (usb-xhci-hcd.1-1.4)"
+                match = re.findall(r'\(([^)]+)\)', DeviceTmp)
+                if match:
+                    self.UsbCameraList.append(clsUsbDeviceList(match[-1],enmUsbType.TypeCamera))
+                    self.LogOut(cur,clsLog.TYPE_LOG,f"camela:{match[-1]}")
+
+if __name__ == "__main__":
+    #当ソースを単体で実行したときに、このステップが実行されます
+    clsUsbDevice().SearchUsbList()
