@@ -31,42 +31,42 @@ const App = () => {//
   if(true){
     MomoManager.addMomoServer({
       DeviceName : "server1",
-      Codec : "H264",
+      Codec : "PV8",
       PortNo : "51001",
       Protocol : "ws",
-      ServerIp : "192.168.3.14",
+      ServerIp : "jyosetu2.local",
       Used : false,
     })
     MomoManager.addMomoServer({
       DeviceName : "server2",
-      Codec : "H264",
+      Codec : "PV8",
       PortNo : "51002",
       Protocol : "ws",
-      ServerIp : "192.168.3.14",
+      ServerIp : "jyosetu2.local",
       Used : false,
     })
     MomoManager.addMomoServer({
       DeviceName : "server3",
-      Codec : "H264",
+      Codec : "PV8",
       PortNo : "51003",
       Protocol : "ws",
-      ServerIp : "192.168.3.14",
+      ServerIp : "jyosetu2.local",
       Used : false,
     })
     MomoManager.addMomoServer({
       DeviceName : "server4",
-      Codec : "H264",
+      Codec : "PV8",
       PortNo : "51004",
       Protocol : "ws",
-      ServerIp : "192.168.3.14",
+      ServerIp : "jyosetu2.local",
       Used : false,
     })
     MomoManager.addMomoServer({
       DeviceName : "server5",
-      Codec : "H264",
+      Codec : "PV8",
       PortNo : "51005",
       Protocol : "ws",
-      ServerIp : "192.168.3.14",
+      ServerIp : "jyosetu2.local",
       Used : false,
     })
   }

@@ -101,11 +101,16 @@ export class MomoManager{
      * コーデック
      */
     CodecItems :{value:string,label:string} [] = [
-        { value: 'H264', label: 'H264'},
         { value: 'VP8' , label: 'VP8'},
         { value: 'VP9' , label: 'VP9' },
-        { value: 'AV1' , label: 'AV1' }
+        { value: 'AV1' , label: 'AV1' },
+        { value: 'H264', label: 'H264'},
     ];
+
+    /**
+     * デフォルト
+     */
+    CodecDefalut : string = "VP8"
 
     /**
      * MomoServerを追加する

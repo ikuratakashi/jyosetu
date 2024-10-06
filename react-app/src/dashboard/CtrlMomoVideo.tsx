@@ -101,7 +101,7 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
     const [conIsConnection,setIsConnection] = useState<ConnectStatus>(ConnectStatus.DisConnect);
     const [conServerSelectIsReadOnly,setServerSelectIsReadOnly] = useState(false);
     const [conServerSelectValue,setServerSelectValue] = useState('none');
-    const [conCodecsSelectValue,setCodecsSelectValue] = useState('H264');
+    const [conCodecsSelectValue,setCodecsSelectValue] = useState(MomoManager?.CodecDefalut);
     const [conVideo,setVideoValue] = useState<UtilsMomoManager.MomoVideo | undefined>(undefined);
 
     //各オブジェクトを操作するときの変数を定義
@@ -227,7 +227,7 @@ function CtrlMomoVideo(props: UtilsCommon.DashboardContentProps) {
                 <Grid item sx={GridSx}>
                     <Select 
                         ref={CodecsRef} 
-                        defaultValue="H264" 
+                        defaultValue={MomoManager?.CodecDefalut} 
                         sx={SelectCodecsSx} 
                         readOnly={conServerSelectIsReadOnly}
                         onChange={handleOnSelect_selCodecsList}
