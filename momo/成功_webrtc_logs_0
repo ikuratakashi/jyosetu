@@ -1,0 +1,35 @@
+[000:000][1279485] (v4l2_video_capturer.cpp:79): GetDeviceName(0): device_name=HD USB Camera: USB Camera, unique_name=usb-xhci-hcd.1-1.2.1
+[000:000][1279485] (v4l2_video_capturer.cpp:79): GetDeviceName(1): device_name=HD USB Camera: USB Camera, unique_name=usb-xhci-hcd.1-1.2.1
+[000:001][1279485] (v4l2_video_capturer.cpp:230): Video Capture enumerats supported image formats:
+[000:001][1279485] (v4l2_video_capturer.cpp:232):   { pixelformat = MJPG, description = 'c4bffa1c' }
+[000:001][1279485] (v4l2_video_capturer.cpp:232):   { pixelformat = YUYV, description = 'c4bffa1c' }
+[000:001][1279485] (v4l2_video_capturer.cpp:248): We prefer format YUYV
+[000:376][1279485] (v4l2_video_capturer.cpp:60): Get Capture
+[000:376][1279515] (audio_device_buffer.cc:66): AudioDeviceBuffer::ctor
+[000:376][1279515] (audio_device_impl.cc:146): current platform is Linux
+[000:376][1279515] (audio_device_impl.cc:168): CreatePlatformSpecificObjects
+[000:376][1279515] (audio_device_impl.cc:905): PlatformAudioLayer
+[000:376][1279515] (audio_device_impl.cc:226): PulseAudio support is enabled.
+[000:376][1279515] (audio_device_impl.cc:259): Dummy Audio APIs will be utilized.
+[000:376][1279515] (audio_device_impl.cc:272): AttachAudioBuffer
+[000:377][1279485] (input_volume_stats_reporter.cc:98): Will not log any `WebRTC.Audio.Apm.AppliedInputVolume.*` histogram stats.
+[000:377][1279485] (input_volume_stats_reporter.cc:98): Will not log any `WebRTC.Audio.Apm.RecommendedInputVolume.*` histogram stats.
+[000:377][1279485] (audio_processing_impl.cc:477): Injected APM submodules:
+Echo control factory: 0
+Echo detector: 0
+Capture analyzer: 0
+Capture post processor: 0
+Render pre processor: 0
+[000:377][1279485] (audio_processing_impl.cc:490): AudioProcessing: AudioProcessing::Config{ pipeline: { maximum_internal_processing_rate: 48000, multi_channel_render: 0, multi_channel_capture: 0 }, pre_amplifier: { enabled: 0, fixed_gain_factor: 1 },capture_level_adjustment: { enabled: 0, pre_gain_factor: 1, post_gain_factor: 1, analog_mic_gain_emulation: { enabled: 0, initial_level: 255 }}, high_pass_filter: { enabled: 0 }, echo_canceller: { enabled: 0, mobile_mode: 0, enforce_high_pass_filtering: 1 }, noise_suppression: { enabled: 0, level: Moderate }, transient_suppression: { enabled: 0 }, gain_controller1: { enabled: 0, mode: AdaptiveAnalog, target_level_dbfs: 3, compression_gain_db: 9, enable_limiter: 1, analog_gain_controller { enabled: 1, startup_min_volume: 0, clipped_level_min: 70, enable_digital_adaptive: 1, clipped_level_step: 15, clipped_ratio_threshold: 0.1, clipped_wait_frames: 300, clipping_predictor:  { enabled: 0, mode: 0, window_length: 5, reference_window_length: 5, reference_window_delay: 5, clipping_threshold: -1, crest_factor_margin: 3, use_predicted_step: 1 }}}, gain_controller2: { enabled: 0, fixed_digital: { gain_db: 0 }, adaptive_digital: { enabled: 0, headroom_db: 5, max_gain_db: 50, initial_gain_db: 15, max_gain_change_db_per_second: 6, max_output_noise_level_dbfs: -50 }, input_volume_control : { enabled 0}}
+[000:377][1279516] (webrtc_voice_engine.cc:355): WebRtcVoiceEngine::WebRtcVoiceEngine
+[000:377][1279515] (webrtc_voice_engine.cc:377): WebRtcVoiceEngine::Init
+[000:377][1279515] (audio_device_impl.cc:292): Init
+[000:377][1279515] (audio_device_impl.cc:636): SetPlayoutDevice(0)
+[000:377][1279515] (adm_helpers.cc:44): Unable to set playout device.
+[000:377][1279515] (audio_device_impl.cc:811): RegisterAudioCallback
+[000:377][1279515] (webrtc_voice_engine.cc:479): WebRtcVoiceEngine::ApplyOptions: AudioOptions {aec: 1, agc: 1, ns: 1, hf: 1, swap: 0, audio_jitter_buffer_max_packets: 200, audio_jitter_buffer_fast_accelerate: 0, audio_jitter_buffer_min_delay_ms: 0, }
+[000:377][1279515] (audio_device_impl.cc:827): BuiltInAECIsAvailable
+[000:377][1279515] (audio_device_generic.cc:18): BuiltInAECIsAvailable: Not supported on this platform
+[000:377][1279515] (audio_device_impl.cc:830): output: 0
+[000:377][1279515] (audio_device_impl.cc:843): BuiltInAGCIsAvailable
+[000:377][1279515] (audio_device_generic.cc:28): BuiltInAGCIsAvailable: Not supported on this 

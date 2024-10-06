@@ -22,6 +22,10 @@ class clsCameraData():
     '''
     IPアドレス
     '''
+    ProcessId : int = 0
+    '''
+    プロセス番号
+    '''
 
     def __init__(self,
                  DeviceName:str,
@@ -29,6 +33,7 @@ class clsCameraData():
                  Protocl : str = "ws",
                  ServerIp:str = "127.0.0.1",
                  Codec:str = "H264",
+                 ProcessId:int = 0
                  ):
         '''
         コンストラクタ
@@ -38,4 +43,5 @@ class clsCameraData():
         self.PortNo = PortNo
         self.Protocl = Protocl
         self.ServerIp = ServerIp
+        self.ProcessId = ProcessId
 
