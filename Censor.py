@@ -7,6 +7,10 @@ import time
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import subplots, pause
+
 from datetime import datetime
 from enum import Enum
 
@@ -188,6 +192,23 @@ class clsCensorManager(clsLog,clsError):
     クライアントへのメッセージ送信
     '''
 
+    x_data = []
+    '''
+    グラフ表示用 X
+    '''
+    y_data = []
+    '''
+    グラフ表示用 Y
+    '''
+    fig = any
+    '''
+    グラフ表示用 fig
+    '''
+    ax = any
+    '''
+    グラフ表示用 ax
+    '''
+    
     def __init__(self,SendClientMessage:any):
         '''
         コンストラクタ
@@ -210,6 +231,9 @@ class clsCensorManager(clsLog,clsError):
         self.Censor_Micro.onReceive = self.onCensor_Micro_Receive
         self.Censor_Micro.Start()
 
+        #グラフ描画の開始
+        #self.StartGraph()
+
     def Stop(self):
         '''
         各種センサーのクローズ
@@ -229,6 +253,9 @@ class clsCensorManager(clsLog,clsError):
         env = self.JyosetuDB.EnvData
 
         try:
+
+            # グラフの描画
+            #self.DrawGraph(pData.value)
 
             if pData.value > 1.0:
 
@@ -298,4 +325,41 @@ class clsCensorManager(clsLog,clsError):
 
         asyncio.run(some_async_function(SendMessage))
 
+    def StartGraph(self):
+        '''
+        値をグラフで描画する処理を開始する
+        '''
+
+        # グラフの設定
+        plt.ion()  # インタラクティブなグラフを有効にする
+        #matplotlib.use("TkAgg") # !!これを追記!!かつブレークを貼る
+
+        self.x_data = []
+        self.y_data = []
+        self.fig,self.ax  = plt.subplots()
+
+        '''
+        self.DrawGraph(0)
+        self.DrawGraph(1)
+        self.DrawGraph(2)
+        self.DrawGraph(3)
+        '''
+    
+    def DrawGraph(self,value):
+        '''
+        グラフを描画する
+        '''
+
+        self.x_data.append(time.time())
+        self.y_data.append(value)
         
+        # グラフにデータを追加
+
+        print(f"{self.x_data},{self.y_data}")
+
+        self.ax.clear()
+        self.ax.plot(self.x_data, self.y_data, color='C0', linestyle='-', label='Sample1')
+        self.ax.legend()
+        plt.draw()
+        plt.pause(3)
+    

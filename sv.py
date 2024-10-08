@@ -121,10 +121,7 @@ from colorama import Back, Style
 import subprocess
 
 from SendMessageClient import clsSendMessageClient,enmSendMessageClientType
-import RPi.GPIO as GPIO
 import gpiod
-import gpiozero
-
 
 port = 50001
 host = "0.0.0.0"  # すべてのインターフェースから接続を受け入れる
