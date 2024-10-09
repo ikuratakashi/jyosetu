@@ -287,11 +287,13 @@ class clsCensorManager(clsLog,clsError):
         self.Censor_Micro.Start()
 
         # マイクロ波センサー 左
+        '''
         self.Censor_Micro = clsCensor_Micro(CensorName=clsCensor_Micro_Enum.CS_LEFT,
                                             IsShowGraph=False,
                                             IsDebug=self.IsDebug)
         self.Censor_Micro.onReceive = self.onCensor_Micro_Receive
         self.Censor_Micro.Start()
+        '''
 
     def Stop(self):
         '''
@@ -387,4 +389,5 @@ if __name__ == "__main__":
     async def DmmySendClientMessage(arg1):
         return True
 
-    clsCensorManager(SendClientMessage=DmmySendClientMessage,IsDebug=True).Start()
+    #デバックモードを解除する場合はIsDebugをFalseに設定する
+    clsCensorManager(SendClientMessage=DmmySendClientMessage,IsDebug=False).Start()
