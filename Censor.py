@@ -1,19 +1,19 @@
+import os
 import asyncio
 import threading
 import inspect
-import board
-import busio
 import time
-import adafruit_ads1x15.ads1115 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
 
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import subplots, pause
+if os.name != "nt": #Windows以外の場合
+    import board
+    import busio
+    import adafruit_ads1x15.ads1115 as ADS
+    from adafruit_ads1x15.analog_in import AnalogIn
 
 from datetime import datetime
 from enum import Enum
 
+from Graph import clsGraph
 from env import clsEnvData
 from Error import clsError
 from Log import clsLog
@@ -70,12 +70,27 @@ class clsCensor_Micro(clsLog,clsError):
     センサーの名前
     '''
 
-    def __init__(self,CensorName:clsCensor_Micro_Enum):
+    IsDebug : bool = False
+    '''
+    デバッグフラグ
+    '''
+
+    IsShowGraph : bool = False
+    '''
+    グラフの表示
+    '''
+
+    def __init__(self,CensorName:clsCensor_Micro_Enum,IsShowGraph,IsDebug:bool = False):
         '''
         コンストラクタ
+            CensorName : センサーの名前
+            IsShowGraph : グラフの表示/非表示
+            IsDebug : デバックモード
         '''
         self.EnvData = clsEnvData()
         self.CensorName = CensorName
+        self.IsDebug = IsDebug
+        self.IsShowGraph = IsShowGraph
 
     def Open(self):
         '''
@@ -95,14 +110,54 @@ class clsCensor_Micro(clsLog,clsError):
         '''
         クラッチコマンドを送信するスレッド
         '''
-        self.Thred = threading.Thread(target=self.MicroThred)
+        if self.IsDebug == True:
+            self.Thred = threading.Thread(target=self.MicroThredDebug)
+        else:
+            self.Thred = threading.Thread(target=self.MicroThred)
         self.Thred.start()
 
+    def MicroThredDebug(self):
+        '''
+        センサー受信の開始(デバッグ)
+        ランダムな値を処理
+        '''
+        cur = inspect.currentframe().f_code.co_name
+        import random
+
+        if self.IsShowGraph == True:
+            Graph = clsGraph(IsDebug=self.IsDebug,GraphName=self.CensorName.value,Label_X="time",Label_Y="value")
+
+        # ランダムな値生成して、送信する
+        while self.IsThredStop == False:
+            try:
+
+                if self.IsShowGraph == True:
+                    Graph.StartGraph()
+
+                RndVol = random.uniform(-1.1,1.1)
+                RndValue = random.uniform(6,100)
+
+                #送信
+                data = clsCensor_Micro_Data(Name=self.CensorName,Vol=RndVol,Value=RndValue)
+                if self.IsShowGraph == True:
+                    Graph.DrawGraph(data.value)
+                self.onReceive(data)
+                self.LogOut(cur,self.Log.TYPE_MICRO,f"Micro Data : name={data.name},value={data.value},vol={data.vol}")
+                time.sleep(0.01)
+
+            except Exception as e:
+                self.HandleError(cur,f"onReceive Core Unexpected error:{e}")
+
+        if self.IsShowGraph == True:
+            Graph.CloseGraph()
+        
     def MicroThred(self):
         '''
         センサー受信の開始
         '''
         cur = inspect.currentframe().f_code.co_name
+
+        Graph = clsGraph(IsDebug=self.IsDebug,GraphName=self.CensorName,Label_X="time",Label_Y="value")
 
         # I2Cバスの作成
         try:
@@ -139,13 +194,19 @@ class clsCensor_Micro(clsLog,clsError):
                 else:
                     #信号受信の処理
 
+                    if self.IsShowGraph == True:
+                        Graph.StartGraph()
+                         
                     #送信
                     data = clsCensor_Micro_Data(Name=self.CensorName,Vol=chan.voltage,Value=chan.value)
                     self.onReceive(data)
 
+                    if self.IsShowGraph == True:
+                        Graph.DrawGraph(data.value)
+
                     self.LogOut(cur,self.Log.TYPE_MICRO,f"Micro Data : name={data.name},value={data.value},vol={data.vol}")
 
-                    time.sleep(0.3)
+                    time.sleep(0.01)
 
             except Exception as e:
                 self.HandleError(cur,f"onReceive Core Unexpected error:{e}")
@@ -156,6 +217,9 @@ class clsCensor_Micro(clsLog,clsError):
         except Exception as e:
             self.HandleError(cur,f"I2C Bus deinit Unexpected error:{e}")
     
+        if self.IsShowGraph == True:
+            Graph.CloseGraph()
+
     def onReceive(self,pData:clsCensor_Micro_Data):
         '''
         受信のイベント
@@ -192,29 +256,18 @@ class clsCensorManager(clsLog,clsError):
     クライアントへのメッセージ送信
     '''
 
-    x_data = []
+    IsDebug : bool = False
     '''
-    グラフ表示用 X
+    デバッグフラグ
     '''
-    y_data = []
-    '''
-    グラフ表示用 Y
-    '''
-    fig = any
-    '''
-    グラフ表示用 fig
-    '''
-    ax = any
-    '''
-    グラフ表示用 ax
-    '''
-    
-    def __init__(self,SendClientMessage:any):
+
+    def __init__(self,SendClientMessage:any,IsDebug:bool = False):
         '''
         コンストラクタ
         '''
         self.EnvData = clsEnvData()
         self.SendClientMessage = SendClientMessage
+        self.IsDebug = IsDebug
     
     def Start(self):
         '''
@@ -227,12 +280,18 @@ class clsCensorManager(clsLog,clsError):
         self.JyosetuDB.DbOpen()
 
         # マイクロ波センサー 正面
-        self.Censor_Micro = clsCensor_Micro(clsCensor_Micro_Enum.CS_FRONT)
+        self.Censor_Micro = clsCensor_Micro(CensorName=clsCensor_Micro_Enum.CS_FRONT,
+                                            IsShowGraph=self.EnvData.MICRO_GRAPTH_SHOW,
+                                            IsDebug=self.IsDebug)
         self.Censor_Micro.onReceive = self.onCensor_Micro_Receive
         self.Censor_Micro.Start()
 
-        #グラフ描画の開始
-        #self.StartGraph()
+        # マイクロ波センサー 左
+        self.Censor_Micro = clsCensor_Micro(CensorName=clsCensor_Micro_Enum.CS_LEFT,
+                                            IsShowGraph=False,
+                                            IsDebug=self.IsDebug)
+        self.Censor_Micro.onReceive = self.onCensor_Micro_Receive
+        self.Censor_Micro.Start()
 
     def Stop(self):
         '''
@@ -253,9 +312,6 @@ class clsCensorManager(clsLog,clsError):
         env = self.JyosetuDB.EnvData
 
         try:
-
-            # グラフの描画
-            #self.DrawGraph(pData.value)
 
             if pData.value > 1.0:
 
@@ -324,42 +380,11 @@ class clsCensorManager(clsLog,clsError):
             await task
 
         asyncio.run(some_async_function(SendMessage))
-
-    def StartGraph(self):
-        '''
-        値をグラフで描画する処理を開始する
-        '''
-
-        # グラフの設定
-        plt.ion()  # インタラクティブなグラフを有効にする
-        #matplotlib.use("TkAgg") # !!これを追記!!かつブレークを貼る
-
-        self.x_data = []
-        self.y_data = []
-        self.fig,self.ax  = plt.subplots()
-
-        '''
-        self.DrawGraph(0)
-        self.DrawGraph(1)
-        self.DrawGraph(2)
-        self.DrawGraph(3)
-        '''
     
-    def DrawGraph(self,value):
-        '''
-        グラフを描画する
-        '''
+if __name__ == "__main__":
+    #当ソースを単体で実行したときに、このステップが実行されます
 
-        self.x_data.append(time.time())
-        self.y_data.append(value)
-        
-        # グラフにデータを追加
+    async def DmmySendClientMessage(arg1):
+        return True
 
-        print(f"{self.x_data},{self.y_data}")
-
-        self.ax.clear()
-        self.ax.plot(self.x_data, self.y_data, color='C0', linestyle='-', label='Sample1')
-        self.ax.legend()
-        plt.draw()
-        plt.pause(3)
-    
+    clsCensorManager(SendClientMessage=DmmySendClientMessage,IsDebug=True).Start()

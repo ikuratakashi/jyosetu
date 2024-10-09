@@ -44,6 +44,8 @@ class clsEnvData:
     MOMO_PATH:str = "/home/jyosetu/jyosetu/momo/momo"
     MOMO_CMD_SUDO:str = ""
 
+    MICRO_GRAPTH_SHOW:bool = False
+
     def __init__(self):
         '''
         コンストラクタ
@@ -115,6 +117,13 @@ class clsEnvData:
         ######################################################################
         try:
             self.WS_LOG_MICRO_STDOUT = int(os.getenv('WS_LOG_MICRO_STDOUT'))
+        except:
+            pass
+        try:
+            if int(os.getenv('WS_LOG_MICRO_STDOUT')) == 1:
+                self.MICRO_GRAPTH_SHOW = True
+            else:
+                self.MICRO_GRAPTH_SHOW = False
         except:
             pass
 
