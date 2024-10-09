@@ -120,7 +120,7 @@ class clsEnvData:
         except:
             pass
         try:
-            if int(os.getenv('WS_LOG_MICRO_STDOUT')) == 1:
+            if int(os.getenv('MICRO_GRAPTH_SHOW')) == 1:
                 self.MICRO_GRAPTH_SHOW = True
             else:
                 self.MICRO_GRAPTH_SHOW = False

@@ -1,4 +1,5 @@
 import matplotlib
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import subplots, pause
 import inspect
@@ -95,7 +96,7 @@ class clsGraph(clsLog,clsError):
         self.ax.set_xlabel(self.Label_X)
         self.ax.set_ylabel(self.Label_Y)
         
-        self.ax.plot(self.x_data, self.y_data, color='C0', linestyle='-')
+        self.ax.plot(self.x_data, self.y_data, color='C0', linestyle='-' , label="Data")
         self.ax.legend()
         plt.draw()
         plt.pause(0.01)
@@ -124,3 +125,4 @@ if __name__ == "__main__":
     # 最後にグラフを閉じる
     graph1.CloseGraph()
     graph2.CloseGraph()
+    plt.show(block=True)
